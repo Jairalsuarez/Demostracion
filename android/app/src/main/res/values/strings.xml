@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Sabores Tropicales</string>
+    <string name="title_activity_main">Sabores Tropicales</string>
+    <string name="package_name">com.saborestropicales.app</string>
+    <string name="custom_url_scheme">com.saborestropicales.app</string>
+</resources>

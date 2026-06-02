@@ -1,0 +1,212 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
+  scroll-behavior: smooth;
+}
+
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  margin: 0;
+  background: #ffffff;
+  color: #0f1f16;
+  font-family: "Aptos", "Segoe UI", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-variant-numeric: tabular-nums;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.material-symbols-outlined {
+  font-variation-settings:
+    "FILL" 0,
+    "wght" 400,
+    "GRAD" 0,
+    "opsz" 24;
+  font-size: 20px;
+}
+
+#root {
+  min-height: 100vh;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+.native-boot-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  background: #ffffff;
+  pointer-events: none;
+  opacity: 1;
+}
+
+.native-boot-splash__logo {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  display: grid;
+  height: 132px;
+  width: 132px;
+  place-items: center;
+  transform: translate(-50%, -50%) scale(1);
+  transform-origin: center;
+  animation: nativeLogoArrive 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.native-boot-splash__logo img {
+  height: 100%;
+  width: 100%;
+  object-fit: contain;
+}
+
+.native-boot-splash--leave {
+  animation: nativeSplashFade 320ms ease both;
+}
+
+.native-boot-splash--checking .native-boot-splash__logo {
+  animation: nativeLogoChecking 920ms ease-in-out infinite;
+}
+
+.auth-checking-logo {
+  animation: authLogoPulse 920ms ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  body {
+    transition: none;
+  }
+
+  .native-boot-splash__logo,
+  .native-boot-splash--checking .native-boot-splash__logo,
+  .native-boot-splash--leave .native-boot-splash__logo,
+  .auth-checking-logo {
+    animation: none;
+  }
+}
+
+@keyframes nativeLogoArrive {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -46%) scale(0.86);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes nativeLogoChecking {
+  0%,
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 0.58;
+    transform: translate(-50%, -50%) scale(0.96);
+  }
+}
+
+@keyframes authLogoPulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.58;
+    transform: scale(0.96);
+  }
+}
+
+@keyframes nativeSplashFade {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+button,
+a,
+select,
+summary,
+input[type="checkbox"],
+input[type="radio"],
+input[type="file"],
+input[type="submit"],
+input[type="button"] {
+  cursor: pointer;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+html.dark body {
+  background: #000;
+  color: #fff;
+}
+
+.skeleton-block {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(90deg, #eef3ec 0%, #f8fbf7 45%, #eef3ec 100%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.3s ease-in-out infinite;
+}
+
+html.dark .skeleton-block {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.16) 45%, rgba(255, 255, 255, 0.08) 100%);
+  background-size: 200% 100%;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes toastProgress {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(max(100vw, 1400px));
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee linear forwards;
+  will-change: transform;
+}
