@@ -242,7 +242,7 @@ export default function AppShell() {
             </div>
           ) : null}
           <main
-            className={`relative overflow-hidden px-3 py-5 sm:px-4 sm:py-6 lg:px-6 ${nativeApp ? "pb-6 lg:pb-6" : ""}`}
+            className={`relative overflow-hidden px-3 py-5 sm:px-4 sm:py-6 lg:px-6 pb-14 ${nativeApp ? "pb-20 lg:pb-20" : "pb-14"}`}
             onTouchEnd={async () => {
               if (!nativeApp || !pullState.active) return;
               const shouldRefresh = pullState.armed && !pullState.cancelled && pullState.distance >= 94;
@@ -287,7 +287,7 @@ export default function AppShell() {
       </div>
 
       <UsageLimitBar onExit={logout} onPauseChange={setDemoPaused} />
-      <Modal containerClassName="max-w-[384px] p-4" open={logoutModalOpen} onClose={() => setLogoutModalOpen(false)} text="Esta accion cerrara tu sesion." title="Cerrar sesion">
+      <Modal containerClassName="max-w-[420px] p-4" open={logoutModalOpen} onClose={() => setLogoutModalOpen(false)} text="Esta accion cerrara tu sesion." title="Cerrar sesion">
         <div className="mt-1 flex gap-3">
           <button
             className="flex-1 rounded-2xl bg-[#dc2626] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#b91c1c] dark:bg-[#ef4444] dark:hover:bg-[#dc2626]"

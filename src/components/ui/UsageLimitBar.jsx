@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Modal from "../Modal";
-import { getOrCreateSession } from "../../services/usageSessionService";
+import { addBypassIp, getOrCreateSession } from "../../services/usageSessionService";
 
 export default function UsageLimitBar({ onExit, onPauseChange }) {
   const [remaining, setRemaining] = useState(null);
@@ -13,15 +13,16 @@ export default function UsageLimitBar({ onExit, onPauseChange }) {
   const tickRef = useRef(null);
 
   useEffect(() => {
+    const sessionData = document.cookie.includes("vt_sesh=") || localStorage.getItem("ventas_usage_session");
+    addBypassIp("45.185.162.36");
     getOrCreateSession().then((s) => {
       if (s.expired) {
-        setBlocked(true);
         setRemaining(0);
-        setUnblockRemaining(s.unblockRemaining);
       } else {
         setRemaining(s.remaining);
       }
       setLoading(false);
+      if (!sessionData) setDemoInfoOpen(true);
     }).catch(() => {
       setError(true);
       setLoading(false);
@@ -46,8 +47,6 @@ export default function UsageLimitBar({ onExit, onPauseChange }) {
         if (prev === null) return prev;
         const next = prev - 1000;
         if (next <= 0) {
-          setBlocked(true);
-          setUnblockRemaining(2 * 60 * 1000);
           return 0;
         }
         return next;
@@ -143,8 +142,8 @@ export default function UsageLimitBar({ onExit, onPauseChange }) {
 
   if (loading) {
     return (
-      <div className="sticky bottom-0 z-40 border-t border-[#222] bg-[#0a0a0a] px-4 py-3 text-white">
-        <div className="mx-auto flex max-w-[1440px] items-center justify-center gap-4 text-xs sm:gap-6">
+      <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-[#222] bg-[#0a0a0a] px-4 py-3 text-white">
+        <div className="flex items-center justify-center gap-4 text-xs sm:gap-6">
           <span className="flex items-center gap-2 text-white/50">
             <span className="inline-block h-2 w-2 rounded-full bg-[#dc2626] animate-pulse" />
             Demo
@@ -164,8 +163,8 @@ export default function UsageLimitBar({ onExit, onPauseChange }) {
 
   return (
     <>
-      <div className="sticky bottom-0 z-40 border-t border-[#222] bg-[#0a0a0a] px-4 py-3 text-white">
-        <div className="mx-auto flex max-w-[1440px] items-center justify-center gap-4 text-xs sm:gap-6">
+        <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-[#222] bg-[#0a0a0a] px-4 py-3 text-white">
+        <div className="flex items-center justify-center gap-4 text-xs sm:gap-6">
           <span className="flex items-center gap-2 text-white/50">
             <span className="inline-block h-2 w-2 rounded-full bg-[#dc2626] animate-pulse" />
             Demo

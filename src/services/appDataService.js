@@ -1,6 +1,6 @@
 import { createNotice, DEFAULT_LOGO, normalizeCashState, normalizeCommunityFeedback, normalizeProduct } from "./normalizers.js";
 
-const APP_KEY = "fizzia-ventas-demo-local-v2";
+const APP_KEY = "fizzia-ventas-local-v3";
 const BUSINESS_CONTACT = {
   telefono: "+593999999999",
   whatsapp: "593999999999",
@@ -10,24 +10,22 @@ const BUSINESS_CONTACT = {
 const nowIso = () => new Date().toISOString();
 
 function seed() {
-  const now = nowIso();
-
   return {
     business: {
       nombre: "Demo",
-      descripcion: "Una demo comercial de Fizzia para presentar ventas, caja e inventario con una experiencia clara y rapida.",
+      descripcion: "",
       telefono: BUSINESS_CONTACT.telefono,
       whatsapp: BUSINESS_CONTACT.whatsapp,
-      ubicacion: "Local comercial",
+      ubicacion: "",
       horario: BUSINESS_CONTACT.horario,
       mapaUrl: "",
       instagramUrl: "",
       facebookUrl: "",
       logoUrl: DEFAULT_LOGO,
-      featuredProductId: "prod-mango",
+      featuredProductId: "",
     },
-    wallet: { saldoActual: 320, updatedAt: now },
-    cashBox: { saldoActual: 85, updatedAt: now },
+    wallet: { saldoActual: 0, updatedAt: nowIso() },
+    cashBox: { saldoActual: 0, updatedAt: nowIso() },
     users: [
       {
         id: "demo-admin",
@@ -52,81 +50,15 @@ function seed() {
         source: "local",
       },
     ],
-    products: [
-      normalizeProduct({
-        id: "prod-mango",
-        nombre: "Jugo natural de mango",
-        categoria: "Bebidas",
-        marca: "Linea demo",
-        descripcion: "Producto de ejemplo para registrar ventas y descontar stock local.",
-        precio: 2.5,
-        stockLocal: 8,
-        stockDeposito: 6,
-        stock: 14,
-        imagen_url: "/images/ad%201.jpeg",
-        activo: true,
-      }),
-      normalizeProduct({
-        id: "prod-fresa",
-        nombre: "Batido de fresa",
-        categoria: "Bebidas",
-        marca: "Linea demo",
-        descripcion: "Item limitado para probar seleccion, cobro y resumen de ventas.",
-        precio: 3.25,
-        stockLocal: 5,
-        stockDeposito: 4,
-        stock: 9,
-        imagen_url: "/images/ad%202.jpeg",
-        activo: true,
-      }),
-      normalizeProduct({
-        id: "prod-combo",
-        nombre: "Combo comercial",
-        categoria: "Combos",
-        marca: "Linea demo",
-        descripcion: "Combo de demostracion para tickets con mayor valor.",
-        precio: 4.8,
-        stockLocal: 4,
-        stockDeposito: 3,
-        stock: 7,
-        imagen_url: "/images/buenafe.png",
-        activo: true,
-      }),
-      normalizeProduct({
-        id: "prod-snack",
-        nombre: "Snack premium",
-        categoria: "Snacks",
-        marca: "Linea demo",
-        descripcion: "Producto seco para mostrar inventario mixto en una demo corta.",
-        precio: 1.75,
-        stockLocal: 10,
-        stockDeposito: 8,
-        stock: 18,
-        imagen_url: "/images/trabajando.png",
-        activo: true,
-      }),
-    ],
+    products: [],
     sales: [],
     expenses: [],
-    expenseCategories: [
-      { id: "cat-mercaderia", nombre: "Mercaderia", createdAt: now },
-      { id: "cat-servicios", nombre: "Servicios", createdAt: now },
-      { id: "cat-otros", nombre: "Otros", createdAt: now },
-    ],
-    distributors: [{ id: "dist-central", nombre: "Proveedor demo", telefono: "", notas: "", createdAt: now }],
+    expenseCategories: [],
+    distributors: [],
     turnos: [],
     schedules: [],
-    communityFeedbacks: [
-      normalizeCommunityFeedback({
-        id: "feedback-1",
-        comment: "El panel se entiende rapido y permite explicar el flujo de venta sin configuraciones externas.",
-      }),
-      normalizeCommunityFeedback({
-        id: "feedback-2",
-        comment: "La demo guarda ventas, caja e inventario directamente en este navegador.",
-      }),
-    ],
-    notifications: [createNotice("Fizzia preparo esta demo para una presentacion comercial.", "Fizzia")],
+    communityFeedbacks: [],
+    notifications: [],
   };
 }
 

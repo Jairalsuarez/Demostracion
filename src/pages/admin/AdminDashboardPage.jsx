@@ -12,6 +12,8 @@ export default function AdminDashboardPage({
   formatDate,
   onNewSale,
   onCloseShift,
+  onOpenCashWithdrawal,
+  onOpenExpense,
   sellerShiftRows,
   money,
 }) {
@@ -27,6 +29,22 @@ export default function AdminDashboardPage({
         title="Resumen del negocio"
         action={
           <div className="flex flex-wrap items-end gap-3">
+            <button
+              className="flex items-center gap-2 rounded-xl border border-[#dfe7db] bg-white px-4 py-3 text-sm font-semibold text-[#183325] transition hover:bg-[#f8fafc] active:scale-[0.99] dark:border-[#333] dark:bg-[#0a0a0a] dark:text-white dark:hover:bg-[#111] sm:px-5 sm:py-4"
+              onClick={onOpenExpense}
+              type="button"
+            >
+              <Icon name="remove_circle" />
+              Registrar egreso
+            </button>
+            <button
+              className="flex items-center gap-2 rounded-xl border border-[#dfe7db] bg-white px-4 py-3 text-sm font-semibold text-[#183325] transition hover:bg-[#f8fafc] active:scale-[0.99] dark:border-[#333] dark:bg-[#0a0a0a] dark:text-white dark:hover:bg-[#111] sm:px-5 sm:py-4"
+              onClick={onOpenCashWithdrawal}
+              type="button"
+            >
+              <Icon name="account_balance" />
+              Retirar caja
+            </button>
             <button
               className="inline-flex items-center gap-3 rounded-xl bg-[#2fa84f] px-6 py-4 text-base font-semibold text-white shadow-[0_16px_30px_rgba(47,168,79,0.22)] transition hover:-translate-y-0.5 hover:bg-[#289644] dark:bg-[#2fa84f] dark:text-white"
               onClick={onNewSale}
@@ -59,7 +77,7 @@ export default function AdminDashboardPage({
                 <Icon name="account_balance_wallet" />
               </span>
               <span className="min-w-0">
-                <strong className="block text-base font-semibold text-[#183325] dark:text-white">Saldo</strong>
+                <strong className="block text-base font-semibold text-[#183325] dark:text-white">Caja</strong>
                 <span className="mt-1 block text-sm text-[#5b6d61] dark:text-[#aaa]">Egresos, mercaderia y saldo actual</span>
               </span>
             </span>
@@ -82,6 +100,7 @@ export default function AdminDashboardPage({
             </span>
             <Icon className="shrink-0 text-[#1f7a3a] dark:text-[#2fa84f]" name="chevron_right" />
           </button>
+
         </div>
 
         <SectionBlock title="Turnos del equipo">

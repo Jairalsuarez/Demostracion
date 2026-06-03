@@ -27,6 +27,8 @@ export default function SellerDashboardPage({
   onCloseShift,
   onNewInformalSale,
   onNewSale,
+  onOpenCashWithdrawal,
+  onOpenExpense,
   onStartShift,
   recentActivity,
   sellerSchedules,
@@ -75,6 +77,22 @@ export default function SellerDashboardPage({
         title="Operacion comercial"
         action={
           <div className="flex flex-wrap items-end gap-3">
+            <button
+              className="rounded-xl border border-[#dfe7db] bg-white px-4 py-3 text-sm font-semibold text-[#183325] transition hover:bg-[#f8fafc] active:scale-[0.99] dark:border-[#333] dark:bg-[#0a0a0a] dark:text-white dark:hover:bg-[#111] sm:px-5 sm:py-4"
+              onClick={onOpenExpense}
+              type="button"
+            >
+              <Icon name="remove_circle" />
+              Registrar egreso
+            </button>
+            <button
+              className="rounded-xl border border-[#dfe7db] bg-white px-4 py-3 text-sm font-semibold text-[#183325] transition hover:bg-[#f8fafc] active:scale-[0.99] dark:border-[#333] dark:bg-[#0a0a0a] dark:text-white dark:hover:bg-[#111] sm:px-5 sm:py-4"
+              onClick={onOpenCashWithdrawal}
+              type="button"
+            >
+              <Icon name="account_balance" />
+              Retirar caja
+            </button>
             <button
               className="inline-flex items-center px-1 py-2 text-sm font-semibold text-[#64748b] underline underline-offset-4 transition hover:text-[#334155] dark:text-[#888] dark:hover:text-white"
               onClick={onNewInformalSale}

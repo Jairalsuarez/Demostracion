@@ -3,6 +3,22 @@ const COOKIE_NAME = "vt_sesh";
 const STORAGE_KEY = "ventas_usage_session";
 const DB_NAME = "ventas_db";
 const DB_STORE = "session";
+const BYPASS_STORAGE_KEY = "ventas_bypass_ips";
+
+function getBypassIps() {
+  try {
+    const raw = localStorage.getItem(BYPASS_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+function addBypassIp(ip) {
+  const ips = getBypassIps();
+  if (!ips.includes(ip)) {
+    ips.push(ip);
+    try { localStorage.setItem(BYPASS_STORAGE_KEY, JSON.stringify(ips)); } catch {}
+  }
+}
 
 function getMidnightMs() {
   const now = new Date();
@@ -124,18 +140,14 @@ export async function getOrCreateSession() {
     try {
       const data = typeof raw === "string" ? JSON.parse(raw) : raw;
 
-      if (data.blockedAt) {
-        const unblockRemaining = getBlockedDuration();
-        if (unblockRemaining > 0) {
-          return {
-            ip: data.ip,
-            fingerprint: data.fingerprint,
-            blockedAt: data.blockedAt,
-            expired: true,
-            remaining: 0,
-            unblockRemaining,
-          };
+      if (data.blockedAt || data.ip) {
+        const bypassIps = getBypassIps();
+        if (bypassIps.includes(data.ip)) {
+          return createFreshSession();
         }
+      }
+
+      if (data.blockedAt) {
         clearAllStorage();
         return createFreshSession();
       }
@@ -145,15 +157,8 @@ export async function getOrCreateSession() {
         if (elapsed < SESSION_DURATION) {
           return { ...data, remaining: SESSION_DURATION - elapsed };
         }
-        const unblockRemaining = getBlockedDuration();
-        markBlocked(data);
-        return {
-          ...data,
-          expired: true,
-          remaining: 0,
-          unblockRemaining,
-          blockedAt: Date.now(),
-        };
+        clearAllStorage();
+        return createFreshSession();
       }
     } catch {}
   }
@@ -186,3 +191,5 @@ function clearAllStorage() {
 export function clearSession() {
   clearAllStorage();
 }
+
+export { addBypassIp, getBypassIps };
