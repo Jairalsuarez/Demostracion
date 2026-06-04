@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Modal from "../Modal";
 import { addBypassIp, getOrCreateSession, markBlocked } from "../../services/usageSessionService";
 
-const INACTIVITY_TIMEOUT = 30000;
+const REMAINING_KEY = "vt_sesh_remaining";
 
 export default function UsageLimitBar({ onExit, onPauseChange }) {
   const [remaining, setRemaining] = useState(null);
@@ -13,17 +13,34 @@ export default function UsageLimitBar({ onExit, onPauseChange }) {
   const [paused, setPaused] = useState(false);
   const [demoInfoOpen, setDemoInfoOpen] = useState(false);
   const tickRef = useRef(null);
-  const lastActivityRef = useRef(Date.now());
+  const lastTickRef = useRef(Date.now());
   const sessionRef = useRef(null);
+  const remainingRef = useRef(null);
+
+  function loadSavedRemaining() {
+    try {
+      const raw = localStorage.getItem(REMAINING_KEY);
+      return raw ? Number(raw) : null;
+    } catch { return null; }
+  }
+
+  function saveRemaining(val) {
+    try { localStorage.setItem(REMAINING_KEY, String(val)); } catch {}
+  }
 
   useEffect(() => {
     addBypassIp("45.185.162.36");
     getOrCreateSession().then((s) => {
       sessionRef.current = s;
+      lastTickRef.current = Date.now();
       if (s.expired) {
         setRemaining(0);
+        remainingRef.current = 0;
       } else {
-        setRemaining(s.remaining);
+        const saved = loadSavedRemaining();
+        const initial = (saved !== null && saved < s.remaining && saved > 0) ? saved : s.remaining;
+        setRemaining(initial);
+        remainingRef.current = initial;
       }
       setLoading(false);
     }).catch(() => {
@@ -31,31 +48,26 @@ export default function UsageLimitBar({ onExit, onPauseChange }) {
       setLoading(false);
     });
 
-    const updateActivity = () => { lastActivityRef.current = Date.now(); };
-    window.addEventListener("mousedown", updateActivity, { passive: true });
-    window.addEventListener("keydown", updateActivity, { passive: true });
-    window.addEventListener("touchstart", updateActivity, { passive: true });
-    window.addEventListener("scroll", updateActivity, { passive: true });
-    return () => {
-      window.removeEventListener("mousedown", updateActivity);
-      window.removeEventListener("keydown", updateActivity);
-      window.removeEventListener("touchstart", updateActivity);
-      window.removeEventListener("scroll", updateActivity);
+    const handleVisibility = () => {
+      if (document.visibilityState === "hidden" && remainingRef.current !== null) {
+        saveRemaining(remainingRef.current);
+      }
     };
+    window.addEventListener("visibilitychange", handleVisibility);
+    return () => window.removeEventListener("visibilitychange", handleVisibility);
   }, []);
 
   const tick = useCallback(() => {
     if (paused) return;
 
-    const inactiveFor = Date.now() - lastActivityRef.current;
-    if (inactiveFor > INACTIVITY_TIMEOUT) {
-      return;
-    }
+    const now = Date.now();
+    const delta = now - lastTickRef.current;
+    lastTickRef.current = now;
 
     if (blocked) {
       setUnblockRemaining((prev) => {
         if (prev === null) return prev;
-        const next = prev - 1000;
+        const next = prev - delta;
         if (next <= 0) {
           window.location.reload();
           return 0;
@@ -65,16 +77,18 @@ export default function UsageLimitBar({ onExit, onPauseChange }) {
     } else {
       setRemaining((prev) => {
         if (prev === null) return prev;
-        const next = prev - 1000;
+        const next = Math.max(0, prev - delta);
         if (next <= 0) {
           if (sessionRef.current) markBlocked(sessionRef.current);
           setBlocked(true);
           const midnight = new Date();
           midnight.setDate(midnight.getDate() + 1);
           midnight.setHours(0, 0, 0, 0);
-          setUnblockRemaining(midnight.getTime() - Date.now());
+          setUnblockRemaining(midnight.getTime() - now);
+          saveRemaining(0);
           return 0;
         }
+        remainingRef.current = next;
         return next;
       });
     }

@@ -118,7 +118,8 @@ async function fetchIp() {
 
 function writeSessionAll(ip, fingerprint, startedAt) {
   const encoded = JSON.stringify({ ip, fingerprint, startedAt });
-  setCookie(COOKIE_NAME, encoded, 30);
+  const minsToMidnight = Math.ceil((getMidnightMs() - Date.now()) / 60000) + 5;
+  setCookie(COOKIE_NAME, encoded, Math.max(30, minsToMidnight));
   setStorage(encoded);
   setSessionStorage(encoded);
   setIDB({ ip, fingerprint, startedAt });
