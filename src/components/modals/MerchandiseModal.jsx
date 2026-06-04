@@ -96,7 +96,7 @@ function ProductPickerModal({ onClose, onSelect, open, products, selectedProduct
                   </span>
                   <span className="min-w-0 flex-1">
                     <strong className="block truncate text-sm font-semibold text-[#183325] dark:text-[#f8fafc]">{product.nombre}</strong>
-                    <span className="mt-1 block text-xs text-[#5b6d61] dark:text-[#c7d2e0]">Local {product.stockLocal} - Deposito {product.stockDeposito}</span>
+                    <span className="mt-1 block text-xs text-[#5b6d61] dark:text-[#c7d2e0]">Stock {product.stock}</span>
                   </span>
                   <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-full ${selected ? "bg-[#f59e0b] text-white" : "bg-[#edf1ea] text-[#5b6d61] dark:bg-[#0f172a] dark:text-[#94a3b8]"}`}>
                     <Icon name={selected ? "check" : "add"} />
@@ -321,7 +321,7 @@ export default function MerchandiseModal({
                           </span>
                           <span className="min-w-0">
                             <strong className="block max-w-full whitespace-normal break-words text-sm font-semibold leading-5 text-[#183325] dark:text-[#f8fafc]">{line.product.nombre}</strong>
-                            <span className="mt-1 block text-xs text-[#5b6d61] dark:text-[#c7d2e0]">Local {line.product.stockLocal} - Deposito {line.product.stockDeposito}</span>
+                            <span className="mt-1 block text-xs text-[#5b6d61] dark:text-[#c7d2e0]">Stock {line.product.stock}</span>
                           </span>
                         </button>
                         <div className="grid shrink-0 grid-cols-[32px_34px_32px_32px] items-center rounded-xl border border-[#dfe7db] bg-white p-1 dark:border-[#314056] dark:bg-[#182235]">

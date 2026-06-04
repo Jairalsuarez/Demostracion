@@ -59,8 +59,7 @@ export default function ProductListTable({ canEdit = false, emptyMessage, money,
                 <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-[#5b6d61] dark:text-[#c7d2e0]">
                   <span className="rounded-full bg-[#f4f8ef] px-3 py-1 dark:bg-[#0f172a]">{product.categoria}</span>
                   <span className="font-medium text-[#183325] dark:text-[#f8fafc]">{money(product.precio)}</span>
-                  <span>Local: {product.stockLocal}</span>
-                  <span>Deposito: {product.stockDeposito}</span>
+                  <span>Stock: {product.stock}</span>
                 </div>
               </div>
             </div>
@@ -139,11 +138,8 @@ export default function ProductListTable({ canEdit = false, emptyMessage, money,
               </td>
               <td className="py-4">{product.categoria}</td>
               <td className="py-4 font-medium">{money(product.precio)}</td>
-              <td className="py-4">
-                <div className="grid gap-1 text-xs text-[#5b6d61] dark:text-[#c7d2e0]">
-                  <span>Local: {product.stockLocal}</span>
-                  <span>Deposito: {product.stockDeposito}</span>
-                </div>
+              <td className="py-4 text-xs text-[#5b6d61] dark:text-[#c7d2e0]">
+                {product.stock}
               </td>
               <td className="py-4">
                 <StockBadge stock={product.stock} />

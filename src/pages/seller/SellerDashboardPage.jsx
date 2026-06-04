@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import ActivityFeed from "../../components/dashboard/ActivityFeed";
 import CloseShiftModal from "../../components/modals/CloseShiftModal";
 import ShiftSummaryModal from "../../components/modals/ShiftSummaryModal";
@@ -36,6 +37,7 @@ export default function SellerDashboardPage({
   shiftSummary,
   money,
 }) {
+  const navigate = useNavigate();
   const [startShiftModalOpen, setStartShiftModalOpen] = useState(false);
   const [closeShiftModalOpen, setCloseShiftModalOpen] = useState(false);
   const [shiftSummaryOpen, setShiftSummaryOpen] = useState(false);
@@ -147,6 +149,25 @@ export default function SellerDashboardPage({
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_360px]">
+        <SectionBlock title="Registro de ventas">
+          <button
+            className="flex w-full items-center justify-between gap-4 rounded-xl border border-[#dfe7db] bg-white px-5 py-4 text-left transition hover:border-[#1f7a3a] dark:border-[#333] dark:bg-[#0a0a0a] dark:hover:border-[#2fa84f]"
+            onClick={() => navigate("/panel/ventas")}
+            type="button"
+          >
+            <span className="flex min-w-0 items-center gap-3">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#eff6ff] text-[#1d4ed8] dark:bg-black dark:text-[#93c5fd]">
+                <Icon name="receipt_long" />
+              </span>
+              <span className="min-w-0">
+                <strong className="block text-base font-semibold text-[#183325] dark:text-white">Ver registro de ventas</strong>
+                <span className="mt-1 block text-sm text-[#5b6d61] dark:text-[#aaa]">Analitica, reportes y descarga PDF</span>
+              </span>
+            </span>
+            <Icon className="shrink-0 text-[#1f7a3a] dark:text-[#2fa84f]" name="chevron_right" />
+          </button>
+        </SectionBlock>
+
         <SectionBlock title="Actividad reciente">
           <button
             className="flex w-full items-center justify-between gap-4 rounded-xl border border-[#dfe7db] bg-white px-5 py-4 text-left transition hover:border-[#1f7a3a] dark:border-[#333] dark:bg-[#0a0a0a] dark:hover:border-[#2fa84f]"

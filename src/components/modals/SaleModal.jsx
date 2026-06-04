@@ -59,7 +59,7 @@ function ProductPickerModal({ money, onClose, onSelect, open, products, selected
         )
       : products;
     return source
-      .sort((a, b) => Number(b.stockLocal > 0) - Number(a.stockLocal > 0) || String(a.nombre || "").localeCompare(String(b.nombre || "")))
+      .sort((a, b) => Number(b.stock > 0) - Number(a.stock > 0) || String(a.nombre || "").localeCompare(String(b.nombre || "")))
       .slice(0, 40);
   }, [products, search]);
 
@@ -100,13 +100,13 @@ function ProductPickerModal({ money, onClose, onSelect, open, products, selected
               return (
                 <button
                   className={`flex w-full items-center gap-3 rounded-2xl border p-3 text-left transition active:scale-[0.99] ${
-                    Number(product.stockLocal || 0) <= 0
+                    Number(product.stock || 0) <= 0
                       ? "border-[#e5e7eb] bg-[#f3f4f6] opacity-70 dark:border-[#23314d] dark:bg-[#0f172a]"
                     : selected
                       ? "border-[#f59e0b]/50 bg-[#fff7ed] dark:border-[#314056] dark:bg-[#182235]"
                       : "border-[#e4ece2] bg-white active:bg-[#f7faf6] dark:border-[#23314d] dark:bg-[#111827] dark:active:bg-[#182235]"
                   }`}
-                  disabled={Number(product.stockLocal || 0) <= 0}
+                  disabled={Number(product.stock || 0) <= 0}
                   key={product.id}
                   onClick={() => onSelect(product.id)}
                   type="button"
@@ -116,10 +116,10 @@ function ProductPickerModal({ money, onClose, onSelect, open, products, selected
                   </span>
                   <span className="min-w-0 flex-1">
                     <strong className="block truncate text-sm font-semibold text-[#183325] dark:text-[#f8fafc]">{product.nombre}</strong>
-                    <span className="mt-1 block text-xs text-[#5b6d61] dark:text-[#c7d2e0]">{money(product.precio)} - {Number(product.stockLocal || 0) <= 0 ? "sin stock en local" : `local ${product.stockLocal}`}</span>
+                    <span className="mt-1 block text-xs text-[#5b6d61] dark:text-[#c7d2e0]">{money(product.precio)} - {Number(product.stock || 0) <= 0 ? "sin stock" : `stock ${product.stock}`}</span>
                   </span>
-                  <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-full ${Number(product.stockLocal || 0) <= 0 ? "bg-[#e5e7eb] text-[#9ca3af] dark:bg-[#1f2937]" : selected ? "bg-[#f59e0b] text-white" : "bg-[#edf1ea] text-[#5b6d61] dark:bg-[#0f172a] dark:text-[#94a3b8]"}`}>
-                    <Icon name={Number(product.stockLocal || 0) <= 0 ? "block" : selected ? "check" : "add"} />
+                  <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-full ${Number(product.stock || 0) <= 0 ? "bg-[#e5e7eb] text-[#9ca3af] dark:bg-[#1f2937]" : selected ? "bg-[#f59e0b] text-white" : "bg-[#edf1ea] text-[#5b6d61] dark:bg-[#0f172a] dark:text-[#94a3b8]"}`}>
+                    <Icon name={Number(product.stock || 0) <= 0 ? "block" : selected ? "check" : "add"} />
                   </span>
                 </button>
               );
@@ -217,7 +217,7 @@ export default function SaleModal({
     (!requiresShift || activeShift) &&
     salePreview.length > 0 &&
     salePreview.every((line) => line.cantidad > 0) &&
-    !salePreview.some((line) => (app.products.find((product) => product.id === line.productId)?.stockLocal || 0) < line.cantidad);
+    !salePreview.some((line) => (app.products.find((product) => product.id === line.productId)?.stock || 0) < line.cantidad);
 
   const canContinuePayment = salePayment.method && (!paymentNeedsEvidence || Boolean(salePayment.evidenceUrl));
 
@@ -231,14 +231,14 @@ export default function SaleModal({
 
   const setLineProduct = (index, productId) => {
     const selectedProduct = activeProducts.find((item) => item.id === productId);
-    if (!selectedProduct || Number(selectedProduct.stockLocal || 0) <= 0) return;
+    if (!selectedProduct || Number(selectedProduct.stock || 0) <= 0) return;
     setSaleLines((current) => {
       const existingIndex = current.findIndex((item, idx) => idx !== index && item.productId === productId);
       if (existingIndex >= 0) {
         const next = current
           .map((item, idx) => {
             if (idx !== existingIndex) return item;
-            return { ...item, cantidad: Math.min(Number(selectedProduct.stockLocal || 1), Number(item.cantidad || 1) + 1) };
+            return { ...item, cantidad: Math.min(Number(selectedProduct.stock || 1), Number(item.cantidad || 1) + 1) };
           })
           .filter((_, idx) => idx !== index);
         setActiveLineIndex(existingIndex);
@@ -247,7 +247,7 @@ export default function SaleModal({
 
       return current.map((item, idx) => {
         if (idx !== index) return item;
-        const nextQuantity = Math.max(1, Math.min(Number(item.cantidad || 1), Number(selectedProduct?.stockLocal || item.cantidad || 1)));
+        const nextQuantity = Math.max(1, Math.min(Number(item.cantidad || 1), Number(selectedProduct?.stock || item.cantidad || 1)));
         return {
           ...item,
           productId,
@@ -264,7 +264,7 @@ export default function SaleModal({
       current.map((item, idx) => {
         if (idx !== index) return item;
         const selectedProduct = activeProducts.find((product) => product.id === item.productId);
-        const stockLimit = Number(selectedProduct?.stockLocal || 99);
+        const stockLimit = Number(selectedProduct?.stock || 99);
         const nextQuantity = Math.max(1, Math.min(stockLimit, Number(item.cantidad || 1) + delta));
         return { ...item, cantidad: nextQuantity };
       })
@@ -324,7 +324,7 @@ export default function SaleModal({
         </div>
         <strong className="mt-2 block text-sm font-semibold text-[#183325] dark:text-[#f8fafc]">{product.nombre}</strong>
         <span className="mt-0.5 block text-xs leading-5 text-[#5b6d61] dark:text-[#c7d2e0]">
-          {money(product.precio)} • local {product.stockLocal}
+          {money(product.precio)} • stock {product.stock}
         </span>
         <span className="mt-1.5 inline-flex items-center gap-2 text-[10px] font-medium text-[#6a7b70] dark:text-[#94a3b8]">
           <Icon className="text-base" name={selected ? "check_circle" : "arrow_forward"} />

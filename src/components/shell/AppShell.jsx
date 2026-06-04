@@ -12,14 +12,6 @@ import { isNativeApp } from "../../utils/platform.js";
 import DebugModal from "../modals/DebugModal";
 import TopMarquee from "../ui/TopMarquee";
 import UsageLimitBar from "../ui/UsageLimitBar";
-import { registerPlugin } from "@capacitor/core";
-
-const AppControl = registerPlugin("AppControl", {
-  web: () => ({
-    exitApp: async () => ({ exited: false }),
-  }),
-});
-
 export default function AppShell() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -242,7 +234,7 @@ export default function AppShell() {
             </div>
           ) : null}
           <main
-            className={`relative overflow-hidden px-3 py-5 sm:px-4 sm:py-6 lg:px-6 pb-14 ${nativeApp ? "pb-20 lg:pb-20" : "pb-14"}`}
+            className="relative px-3 py-5 pb-20 sm:px-4 sm:py-6 sm:pb-20 lg:px-6"
             onTouchEnd={async () => {
               if (!nativeApp || !pullState.active) return;
               const shouldRefresh = pullState.armed && !pullState.cancelled && pullState.distance >= 94;
@@ -287,6 +279,7 @@ export default function AppShell() {
       </div>
 
       <UsageLimitBar onExit={logout} onPauseChange={setDemoPaused} />
+
       <Modal containerClassName="max-w-[420px] p-4" open={logoutModalOpen} onClose={() => setLogoutModalOpen(false)} text="Esta accion cerrara tu sesion." title="Cerrar sesion">
         <div className="mt-1 flex gap-3">
           <button

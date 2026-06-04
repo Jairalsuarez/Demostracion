@@ -1,6 +1,5 @@
 import Modal from "../Modal";
 import Icon from "../ui/Icon";
-import { trackWhatsAppClick } from "../../services/publicAnalyticsService.js";
 
 export default function ProductDetailsModal({ money, onClose, open, product, variant = "default", whatsappNumber }) {
   const isPublic = variant === "public";
@@ -40,6 +39,7 @@ export default function ProductDetailsModal({ money, onClose, open, product, var
                 <li>Categoria: {product?.categoria}</li>
                 <li>Marca: {product?.marca?.trim() || "Sin marca"}</li>
                 <li>Precio: {money(product?.precio)}</li>
+                <li>Costo: {money(product?.costo)}</li>
                 <li>Stock disponible: {product?.stock}</li>
               </ul>
             </div>
@@ -47,7 +47,7 @@ export default function ProductDetailsModal({ money, onClose, open, product, var
 
           <div className="mt-auto grid gap-3 pt-5">
             {isPublic ? (
-              <a className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-[#25d366] px-4 py-3 text-sm font-medium text-white" href={whatsapp} onClick={trackWhatsAppClick} rel="noreferrer" target="_blank">
+              <a className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-[#25d366] px-4 py-3 text-sm font-medium text-white" href={whatsapp} rel="noreferrer" target="_blank">
                 <Icon name="chat" />
                 Consultar por WhatsApp
               </a>

@@ -1,5 +1,5 @@
 import { Suspense, lazy, useEffect } from "react";
-import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import { Navigate, Route, Routes, useNavigate, useParams } from "react-router-dom";
 import ProductDetailsModal from "./components/modals/ProductDetailsModal";
 import CashWithdrawalModal from "./components/modals/CashWithdrawalModal";
 import ExpenseModal from "./components/modals/ExpenseModal";
@@ -25,6 +25,57 @@ const LoginPage = lazy(() => import("./pages/auth/LoginPage.jsx"));
 const ProductsPage = lazy(() => import("./pages/catalog/ProductsPage.jsx"));
 const DashboardPage = lazy(() => import("./pages/dashboard/DashboardPage.jsx"));
 const SalesPage = lazy(() => import("./pages/sales/SalesPage.jsx"));
+
+function NewProductRoute() {
+  const { productForm, setProductForm, saveProduct, uploadProductImage, uploadError, uploading, resetProductFlow } = useAppContext();
+  const navigate = useNavigate();
+
+  const handleClose = () => {
+    resetProductFlow();
+    navigate("/panel/productos");
+  };
+
+  return (
+    <ProductModal
+      open
+      presentation="page"
+      onClose={handleClose}
+      productForm={productForm}
+      setProductForm={setProductForm}
+      saveProduct={saveProduct}
+      uploadProductImage={uploadProductImage}
+      uploadError={uploadError}
+      uploading={uploading}
+    />
+  );
+}
+
+function EditProductRoute() {
+  const { products, productForm, setProductForm, saveProduct, uploadProductImage, uploadError, uploading, removeProduct } = useAppContext();
+  const navigate = useNavigate();
+  const { productId } = useParams();
+  const product = products.find((p) => p.id === productId) || null;
+
+  const handleClose = () => {
+    navigate("/panel/productos");
+  };
+
+  return (
+    <ProductModal
+      editing={product}
+      open
+      presentation="page"
+      onClose={handleClose}
+      productForm={productForm}
+      setProductForm={setProductForm}
+      saveProduct={saveProduct}
+      uploadProductImage={uploadProductImage}
+      uploadError={uploadError}
+      uploading={uploading}
+      removeProduct={removeProduct}
+    />
+  );
+}
 
 function App() {
   const navigate = useNavigate();
@@ -90,13 +141,11 @@ function App() {
     visibleProducts,
     editing,
     openEditProduct,
+    openCreateProduct,
     saveProduct,
     removeProduct,
     productForm,
-    productModal,
     setProductForm,
-    setProductModal,
-    resetProductFlow,
     walletForm,
     walletModal,
     adjustWallet,
@@ -121,8 +170,13 @@ function App() {
     openMerchandiseFlow({ asPage: true });
     navigate("/panel/saldo/mercaderia");
   };
-  const openProductCreateAction = () => navigate("/panel/productos");
-  const openTransferInventoryAction = () => navigate("/panel/productos");
+  const openProductCreateAction = () => {
+    navigate("/panel/productos/nuevo");
+  };
+  const openProductEditAction = (product) => {
+    navigate(`/panel/productos/${product.id}/editar`);
+  };
+
 
   return (
     <>
@@ -282,10 +336,9 @@ function App() {
                     canCreate={user?.role === "admin"}
                     canEdit={user?.role === "admin"}
                     money={money}
-                    onEdit={openEditProduct}
+                    onEdit={openProductEditAction}
                     onNewProduct={openProductCreateAction}
                     onRemove={removeProduct}
-                    onTransfer={openTransferInventoryAction}
                     onView={setSelected}
                     products={(user?.role === "admin" ? app.products : visibleProducts).slice(0, 6)}
                   />
@@ -297,26 +350,17 @@ function App() {
               />
               <Route
                 path="/panel/productos/nuevo"
-                element={<Navigate replace to="/panel/productos" />}
+                element={<NewProductRoute />}
               />
               <Route
                 path="/panel/productos/:productId/editar"
-                element={<Navigate replace to="/panel/productos" />}
+                element={<EditProductRoute />}
               />
               <Route path="/panel/perfil" element={<ProfilePage onSave={saveProfile} onUploadAvatar={uploadProfileAvatar} user={user} />} />
             </Route>
           </Route>
 
-          <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
-            <Route element={<PanelLayout />}>
-              <Route
-                path="/panel/agenda"
-                element={<Navigate replace to="/panel" />}
-              />
-              <Route path="/panel/analitica" element={<Navigate replace to="/panel" />} />
-            </Route>
-          </Route>
-
+          
           <Route path="*" element={<Navigate replace to={session ? "/panel" : nativeApp ? "/login" : "/"} />} />
         </Routes>
       </Suspense>
@@ -390,21 +434,6 @@ function App() {
         open={cashWithdrawalModal}
         setCashWithdrawalForm={setCashWithdrawalForm}
         withdrawCashToWallet={withdrawCashToWallet}
-      />
-      <ProductModal
-        editing={editing}
-        onClose={() => {
-          setProductForm(editing || { nombre: "", categoria: "", marca: "", precio: "", stockLocal: 0, stockDeposito: 0, descripcion: "", imagen_url: "", activo: true });
-          setProductModal(false);
-        }}
-        open={productModal}
-        productForm={productForm || { nombre: "", categoria: "", marca: "", precio: "", stockLocal: 0, stockDeposito: 0, descripcion: "", imagen_url: "", activo: true }}
-        removeProduct={removeProduct}
-        saveProduct={saveProduct}
-        setProductForm={setProductForm}
-        uploadError={uploadError}
-        uploadProductImage={uploadProductImage}
-        uploading={uploading}
       />
       <ProductDetailsModal money={money} onClose={() => setSelected(null)} open={Boolean(selected)} product={selected} variant={session || nativeApp ? "default" : "public"} whatsappNumber={app.business.whatsapp} />
       {adOverlay ? <AdOverlay ad={adOverlay} onClose={() => setAdOverlay(null)} /> : null}

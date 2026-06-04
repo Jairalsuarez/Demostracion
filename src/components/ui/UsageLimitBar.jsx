@@ -13,7 +13,6 @@ export default function UsageLimitBar({ onExit, onPauseChange }) {
   const tickRef = useRef(null);
 
   useEffect(() => {
-    const sessionData = document.cookie.includes("vt_sesh=") || localStorage.getItem("ventas_usage_session");
     addBypassIp("45.185.162.36");
     getOrCreateSession().then((s) => {
       if (s.expired) {
@@ -22,7 +21,6 @@ export default function UsageLimitBar({ onExit, onPauseChange }) {
         setRemaining(s.remaining);
       }
       setLoading(false);
-      if (!sessionData) setDemoInfoOpen(true);
     }).catch(() => {
       setError(true);
       setLoading(false);

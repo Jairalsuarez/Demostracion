@@ -41,7 +41,7 @@ export default function SelectedSaleProductCard({ line, index, product, money, o
             </span>
             <span className="min-w-0">
               <strong className="block max-w-full whitespace-normal break-words text-sm font-semibold leading-5 text-[#183325] dark:text-[#f8fafc]">{product.nombre}</strong>
-              <span className="mt-1 block text-xs text-[#5b6d61] dark:text-[#c7d2e0]">{money(product.precio)} - local {product.stockLocal}</span>
+              <span className="mt-1 block text-xs text-[#5b6d61] dark:text-[#c7d2e0]">{money(product.precio)} - stock {product.stock}</span>
             </span>
           </button>
           <div className="grid shrink-0 grid-cols-[32px_30px_32px] items-center rounded-xl border border-[#dfe7db] bg-white p-1 dark:border-[#314056] dark:bg-[#182235]">
@@ -57,7 +57,7 @@ export default function SelectedSaleProductCard({ line, index, product, money, o
             <span className="text-center text-sm font-bold text-[#183325] dark:text-[#f8fafc]">{line.cantidad || 1}</span>
             <button
               className="grid h-8 w-8 place-items-center rounded-lg text-[#183325] disabled:opacity-40 dark:text-white"
-              disabled={Number(line.cantidad || 1) >= Number(product.stockLocal || 0)}
+              disabled={Number(line.cantidad || 1) >= Number(product.stock || 0)}
               onClick={() => onAdjust(index, 1)}
               onPointerDown={(event) => event.stopPropagation()}
               type="button"

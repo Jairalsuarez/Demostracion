@@ -1,4 +1,4 @@
-import { createNotice, DEFAULT_LOGO, normalizeCashState, normalizeCommunityFeedback, normalizeProduct } from "./normalizers.js";
+import { createNotice, DEFAULT_LOGO, normalizeCashState, normalizeProduct } from "./normalizers.js";
 
 const APP_KEY = "fizzia-ventas-local-v3";
 const BUSINESS_CONTACT = {

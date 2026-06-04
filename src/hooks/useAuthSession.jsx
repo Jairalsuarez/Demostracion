@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { clearSession, loginUser, logoutSupabaseSession } from "../services/authService.js";
+import { clearSession, loginUser } from "../services/authService.js";
 
 const REMEMBER_LOGIN_KEY = "sabores-remember-login-v2";
 const LEGACY_REMEMBER_LOGIN_KEY = "sabores-remember-login-v1";
@@ -19,18 +19,9 @@ function saveRememberedLogin({ email, password, rememberLogin }) {
       window.localStorage.removeItem(LEGACY_REMEMBER_LOGIN_KEY);
       return;
     }
-
-    window.localStorage.setItem(
-      REMEMBER_LOGIN_KEY,
-      JSON.stringify({
-        email: email || "",
-        password: password || "",
-        rememberLogin: true,
-      })
-    );
+    window.localStorage.setItem(REMEMBER_LOGIN_KEY, JSON.stringify({ email: email || "", password: password || "", rememberLogin: true }));
     window.localStorage.removeItem(LEGACY_REMEMBER_LOGIN_KEY);
   } catch {
-    // If storage is unavailable, login still works normally.
   }
 }
 
@@ -50,12 +41,10 @@ export default function useAuthSession({ inform, personName, setSession, setSkip
     setLoginError("");
     const result = await loginUser(loginForm);
     setLoginLoading(false);
-
     if (!result.ok) {
       setLoginError(result.error);
       return false;
     }
-
     saveRememberedLogin(loginForm);
     setAuthChecking(true);
     setSession(result.session);
@@ -72,18 +61,8 @@ export default function useAuthSession({ inform, personName, setSession, setSkip
     setSkipNextSessionRestore(true);
     setAuthChecking(false);
     clearSession();
-    logoutSupabaseSession();
     setSession(null);
   };
 
-  return {
-    loginLoading,
-    authChecking,
-    setAuthChecking,
-    loginError,
-    loginForm,
-    setLoginForm,
-    handleLogin,
-    logout,
-  };
+  return { loginLoading, authChecking, setAuthChecking, loginError, loginForm, setLoginForm, handleLogin, logout };
 }

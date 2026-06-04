@@ -11,8 +11,7 @@ export default class RouteErrorBoundary extends Component {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error, info) {
-    console.error("Route error:", error, info);
+  componentDidCatch() {
   }
 
   render() {
