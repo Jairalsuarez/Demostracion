@@ -192,4 +192,4 @@ export function clearSession() {
   clearAllStorage();
 }
 
-export { addBypassIp, getBypassIps };
+export { addBypassIp, getBypassIps, markBlocked };

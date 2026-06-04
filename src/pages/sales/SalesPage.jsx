@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import SaleDetailsModal from "../../components/modals/SaleDetailsModal";
 import EmptyState from "../../components/ui/EmptyState";
 import Icon from "../../components/ui/Icon";
@@ -56,6 +57,7 @@ function getWeekNumber(date) {
 }
 
 export default function SalesPage() {
+  const navigate = useNavigate();
   const { app, money, formatDate } = useAppContext();
   const [selectedSaleId, setSelectedSaleId] = useState(null);
   const [sellerFilter, setSellerFilter] = useState("todos");
@@ -183,8 +185,6 @@ export default function SalesPage() {
   const formatDateTime = (value) =>
     new Intl.DateTimeFormat("es-EC", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
 
-  const selectedSellerName = sellerFilter === "todos" ? "Todos los vendedores" : (sellerList.find((s) => s.id === sellerFilter)?.name || "Vendedor");
-
   const downloadPDF = useCallback(async () => {
     const { default: jsPDF } = await import("jspdf");
     const html2canvas = (await import("html2canvas")).default;
@@ -219,40 +219,50 @@ export default function SalesPage() {
   }, []);
 
   const weekNumber = getWeekNumber(now);
+  const previewCount = 5;
 
   return (
     <div className="space-y-6">
       <PageHeader
         action={
-          <button
-            className="inline-flex min-h-[52px] items-center justify-center gap-3 rounded-xl bg-[#1f7a3a] px-5 py-3 text-base font-semibold text-white shadow-[0_12px_26px_rgba(31,122,58,0.20)] transition active:scale-[0.99] dark:bg-[linear-gradient(135deg,#2563eb,#1d4ed8)]"
-            onClick={downloadPDF}
-            type="button"
-          >
-            <Icon name="picture_as_pdf" />
-            Descargar PDF
-          </button>
+          <div className="flex flex-wrap gap-3">
+            <button
+              className="inline-flex min-h-[52px] items-center justify-center gap-3 rounded-xl bg-[#1f7a3a] px-5 py-3 text-base font-semibold text-white shadow-[0_12px_26px_rgba(31,122,58,0.20)] transition active:scale-[0.99] dark:bg-[linear-gradient(135deg,#2563eb,#1d4ed8)]"
+              onClick={downloadPDF}
+              type="button"
+            >
+              <Icon name="picture_as_pdf" />
+              Descargar PDF
+            </button>
+          </div>
         }
         eyebrow="Reportes"
-        title="Registro de ventas"
+        title="Analítica de ventas"
         description={`Semana ${weekNumber} — ${getShortDate(weekStart)} al ${getShortDate(weekEnd)}`}
       />
 
-      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-[#dfe7db] bg-white px-4 py-3 dark:border-[#333] dark:bg-[#0a0a0a]">
-        <Icon className="text-[#5b6d61] dark:text-[#aaa]" name="person" />
-        <select
-          className="flex-1 bg-transparent text-sm font-semibold text-[#183325] outline-none dark:text-white"
-          value={sellerFilter}
-          onChange={(e) => setSellerFilter(e.target.value)}
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#dfe7db] bg-white px-4 py-3 dark:border-[#333] dark:bg-[#0a0a0a]">
+        <div className="flex items-center gap-3">
+          <Icon className="text-[#5b6d61] dark:text-[#aaa]" name="person" />
+          <select
+            className="bg-transparent text-sm font-semibold text-[#183325] outline-none dark:text-white"
+            value={sellerFilter}
+            onChange={(e) => setSellerFilter(e.target.value)}
+          >
+            <option value="todos">Todos los vendedores</option>
+            {sellerList.map((seller) => (
+              <option key={seller.id} value={seller.id}>{seller.name}</option>
+            ))}
+          </select>
+        </div>
+        <button
+          className="inline-flex items-center gap-2 rounded-xl border border-[#dfe7db] bg-white px-4 py-2.5 text-sm font-semibold text-[#183325] transition hover:bg-[#f8fafc] active:scale-[0.99] dark:border-[#333] dark:bg-[#0a0a0a] dark:text-white dark:hover:bg-[#111]"
+          onClick={() => navigate("/panel/ventas/registro")}
+          type="button"
         >
-          <option value="todos">Todos los vendedores</option>
-          {sellerList.map((seller) => (
-            <option key={seller.id} value={seller.id}>{seller.name}</option>
-          ))}
-        </select>
-        <span className="text-xs text-[#5b6d61] dark:text-[#aaa]">
-          {weekSales.length} venta(s) esta semana
-        </span>
+          <Icon name="list_alt" />
+          Ver todas las ventas
+        </button>
       </div>
 
       <div className="space-y-6" ref={printRef}>
@@ -307,34 +317,6 @@ export default function SalesPage() {
             />
           </div>
         </div>
-
-        <SectionBlock title={`Todas las ventas (${allSalesSorted.length})`}>
-          {allSalesSorted.length ? (
-            <div className="space-y-2">
-              {allSalesSorted.map((sale) => (
-                <button
-                  key={sale.id}
-                  className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-[#edf1ea] bg-white p-3 text-left dark:border-[#23314d] dark:bg-[#111827]"
-                  onClick={() => setSelectedSaleId(sale.id)}
-                  type="button"
-                >
-                  <span className="min-w-0">
-                    <span className="flex items-center gap-2">
-                      <strong className="truncate text-sm font-semibold text-[#183325] dark:text-[#f8fafc]">{sale.userName || "Sin nombre"}</strong>
-                      <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${sale.informal ? "bg-[#fff7ed] text-[#c2410c] dark:bg-[#3b1d12] dark:text-[#fdba74]" : "bg-[#eff6ff] text-[#1d4ed8] dark:bg-[#172554] dark:text-[#93c5fd]"}`}>
-                        {sale.informal ? "Informal" : "Formal"}
-                      </span>
-                    </span>
-                    <span className="mt-1 block truncate text-xs text-[#5b6d61] dark:text-[#c7d2e0]">{formatDateTime(sale.createdAt)} - {formatPaymentMethod(sale.paymentMethod)}</span>
-                  </span>
-                  <strong className="text-sm text-[#183325] dark:text-[#f8fafc]">{money(sale.total)}</strong>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <EmptyState title="Sin ventas" description={sellerFilter === "todos" ? "Cuando registres ventas apareceran aqui." : "Este vendedor no tiene ventas registradas."} />
-          )}
-        </SectionBlock>
       </div>
 
       <SaleDetailsModal formatDateTime={formatDateTime} money={money} onClose={() => setSelectedSaleId(null)} open={Boolean(selectedSale)} sale={selectedSale} />

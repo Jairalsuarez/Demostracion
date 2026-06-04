@@ -25,6 +25,7 @@ const LoginPage = lazy(() => import("./pages/auth/LoginPage.jsx"));
 const ProductsPage = lazy(() => import("./pages/catalog/ProductsPage.jsx"));
 const DashboardPage = lazy(() => import("./pages/dashboard/DashboardPage.jsx"));
 const SalesPage = lazy(() => import("./pages/sales/SalesPage.jsx"));
+const SalesRegistryPage = lazy(() => import("./pages/sales/SalesRegistryPage.jsx"));
 
 function NewProductRoute() {
   const { productForm, setProductForm, saveProduct, uploadProductImage, uploadError, uploading, resetProductFlow } = useAppContext();
@@ -206,6 +207,7 @@ function App() {
                 }
               />
               <Route path="/panel/ventas" element={<SalesPage />} />
+              <Route path="/panel/ventas/registro" element={<SalesRegistryPage />} />
               <Route
                 path="/panel/ventas/nueva"
                 element={

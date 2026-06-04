@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Modal from "../Modal";
-import { addBypassIp, getOrCreateSession } from "../../services/usageSessionService";
+import { addBypassIp, getOrCreateSession, markBlocked } from "../../services/usageSessionService";
+
+const INACTIVITY_TIMEOUT = 30000;
 
 export default function UsageLimitBar({ onExit, onPauseChange }) {
   const [remaining, setRemaining] = useState(null);
@@ -11,10 +13,13 @@ export default function UsageLimitBar({ onExit, onPauseChange }) {
   const [paused, setPaused] = useState(false);
   const [demoInfoOpen, setDemoInfoOpen] = useState(false);
   const tickRef = useRef(null);
+  const lastActivityRef = useRef(Date.now());
+  const sessionRef = useRef(null);
 
   useEffect(() => {
     addBypassIp("45.185.162.36");
     getOrCreateSession().then((s) => {
+      sessionRef.current = s;
       if (s.expired) {
         setRemaining(0);
       } else {
@@ -25,10 +30,27 @@ export default function UsageLimitBar({ onExit, onPauseChange }) {
       setError(true);
       setLoading(false);
     });
+
+    const updateActivity = () => { lastActivityRef.current = Date.now(); };
+    window.addEventListener("mousedown", updateActivity, { passive: true });
+    window.addEventListener("keydown", updateActivity, { passive: true });
+    window.addEventListener("touchstart", updateActivity, { passive: true });
+    window.addEventListener("scroll", updateActivity, { passive: true });
+    return () => {
+      window.removeEventListener("mousedown", updateActivity);
+      window.removeEventListener("keydown", updateActivity);
+      window.removeEventListener("touchstart", updateActivity);
+      window.removeEventListener("scroll", updateActivity);
+    };
   }, []);
 
   const tick = useCallback(() => {
     if (paused) return;
+
+    const inactiveFor = Date.now() - lastActivityRef.current;
+    if (inactiveFor > INACTIVITY_TIMEOUT) {
+      return;
+    }
 
     if (blocked) {
       setUnblockRemaining((prev) => {
@@ -45,6 +67,12 @@ export default function UsageLimitBar({ onExit, onPauseChange }) {
         if (prev === null) return prev;
         const next = prev - 1000;
         if (next <= 0) {
+          if (sessionRef.current) markBlocked(sessionRef.current);
+          setBlocked(true);
+          const midnight = new Date();
+          midnight.setDate(midnight.getDate() + 1);
+          midnight.setHours(0, 0, 0, 0);
+          setUnblockRemaining(midnight.getTime() - Date.now());
           return 0;
         }
         return next;
