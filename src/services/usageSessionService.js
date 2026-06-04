@@ -32,6 +32,14 @@ function getBlockedDuration() {
   return getMidnightMs() - Date.now();
 }
 
+function getUnblockTime(blockedAt) {
+  const blocked = new Date(Number(blockedAt));
+  const unblock = new Date(blocked);
+  unblock.setDate(unblock.getDate() + 1);
+  unblock.setHours(0, 0, 0, 0);
+  return unblock.getTime();
+}
+
 function setCookie(name, value, minutes) {
   const expires = new Date(Date.now() + minutes * 60 * 1000).toUTCString();
   document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax`;
@@ -149,6 +157,11 @@ export async function getOrCreateSession() {
       }
 
       if (data.blockedAt) {
+        const unblockTime = getUnblockTime(data.blockedAt);
+        const remaining = unblockTime - Date.now();
+        if (remaining > 0) {
+          return { ...data, remaining: 0, blocked: true, unblockRemaining: remaining };
+        }
         clearAllStorage();
         return createFreshSession();
       }

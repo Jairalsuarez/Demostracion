@@ -33,7 +33,12 @@ export default function UsageLimitBar({ onExit, onPauseChange }) {
     getOrCreateSession().then((s) => {
       sessionRef.current = s;
       lastTickRef.current = Date.now();
-      if (s.expired) {
+      if (s.blocked) {
+        setBlocked(true);
+        setRemaining(0);
+        setUnblockRemaining(s.unblockRemaining);
+        remainingRef.current = 0;
+      } else if (s.expired) {
         setRemaining(0);
         remainingRef.current = 0;
       } else {
