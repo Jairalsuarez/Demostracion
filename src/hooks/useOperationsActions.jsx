@@ -59,7 +59,7 @@ export default function useOperationsActions({
   merchandiseSubmitting, setMerchandiseSubmitting, setMerchandiseModal,
   walletForm, setWalletForm, setWalletModal,
   cashWithdrawalForm, setCashWithdrawalForm, setCashWithdrawalModal,
-  scheduleForm, setScheduleForm, commit, notify, inform, personName, money, shortTime,
+  scheduleForm, setScheduleForm, commit, inform, personName, money, shortTime,
   emptyWalletForm, emptyScheduleForm,
 }) {
   const isAdminRole = user?.role === "admin";
@@ -100,7 +100,6 @@ export default function useOperationsActions({
         schedules: (current.schedules || []).map((item) => item.id === matchedSchedule.id ? { ...matchedSchedule, estado: "en_progreso" } : item),
       }));
     }
-    notify(`${personName(user)} inicio un turno.`, personName(user), "success");
     inform(`Inicio de turno registrado a las ${shortTime(draftShift.startedAt)}.`, "success");
   };
 
@@ -129,7 +128,6 @@ export default function useOperationsActions({
         schedules: (current.schedules || []).map((item) => item.id === matchedSchedule.id ? { ...matchedSchedule, estado: nextStatus } : item),
       }));
     }
-    notify(isAdminClosing ? `${personName(user)} cerro el turno de ${targetShift.userName}.` : `${personName(user)} cerro su turno.`, personName(user));
     inform(`Cierre de turno registrado a las ${shortTime(closedShift.closedAt)}.`, "success");
   };
 
@@ -161,7 +159,6 @@ export default function useOperationsActions({
       }),
       turnos: nextShift ? current.turnos.map((turno) => turno.id === activeShift.id ? nextShift : turno) : current.turnos,
     }));
-    notify(`${personName(user)} registro una venta por ${money(saleTotal)}.`, personName(user), "success");
     setSaleLines([{ productId: "", cantidad: 1 }]);
     setSalePayment({ method: "efectivo", evidenceUrl: "", evidenceName: "" });
     setSaleModal(false);
@@ -195,7 +192,6 @@ export default function useOperationsActions({
       ...current, sales: [sale, ...current.sales], cashBox: nextCashBox, wallet: nextWallet,
       turnos: nextShift ? current.turnos.map((turno) => turno.id === activeShift.id ? nextShift : turno) : current.turnos,
     }));
-    notify(`${personName(user)} registro una venta informal por ${money(total)}.`, personName(user), "success");
     setInformalSale({ total: 0, totalInput: "", description: "" });
     setInformalSalePayment({ method: "efectivo", evidenceUrl: "", evidenceName: "" });
     setInformalSaleModal(false);
@@ -233,7 +229,6 @@ export default function useOperationsActions({
     const nextWallet = fundingSource === "wallet" ? { saldoActual: Number(app.wallet?.saldoActual || 0) - amount, updatedAt: new Date().toISOString() } : app.wallet;
     const nextCashBox = fundingSource === "cash" ? { saldoActual: Number(cashBox?.saldoActual || 0) - amount, updatedAt: new Date().toISOString() } : cashBox;
     commit((current) => ({ ...current, expenses: [draft, ...current.expenses], wallet: nextWallet, cashBox: nextCashBox }));
-    notify(`${personName(user)} registro un egreso de ${money(amount)}.`, personName(user), "warning");
     resetExpenseForm();
     setExpenseModal(false);
     inform("Egreso registrado con exito.", "success");
@@ -282,7 +277,6 @@ export default function useOperationsActions({
       expenses: [draftExpense, ...current.expenses], wallet: nextWallet,
       products: current.products.map((product) => nextProducts.find((item) => item.id === product.id) || product),
     }));
-    notify(`${personName(user)} registro mercaderia por ${money(amount)}.`, personName(user), "warning");
     setMerchandise({ distributorId: "", distributorName: "", isNewDistributor: false, newDistributorName: "", location: "deposito", amount: 0, amountInput: "" });
     setMerchandiseLines([{ productId: "", cantidad: 1 }]);
     setMerchandiseModal(false);
@@ -295,18 +289,13 @@ export default function useOperationsActions({
     if (!isAdminRole) return inform("Solo administracion puede cambiar el saldo.", "warning");
     const nextBalance = Number(walletForm.saldo || 0);
     const reason = walletForm.motivo.trim();
-    const password = String(walletForm.password || "").trim();
     if (!Number.isFinite(nextBalance) || !reason) return inform("Indica el saldo y un motivo.", "warning");
-    if (!password) return inform("Ingresa tu contrasena.", "warning");
     if (!walletForm.confirmationAccepted) return inform("Confirma el ajuste.", "warning");
-    const localAdmin = app.users.find((item) => item.id === user?.id);
-    if (!localAdmin || localAdmin.password !== password) return inform("Contrasena incorrecta.", "error");
 
     const draftWallet = { saldoActual: nextBalance, updatedAt: new Date().toISOString() };
     commit((current) => ({ ...current, wallet: draftWallet }));
-    notify(`${personName(user)} ajusto el saldo general a ${money(draftWallet.saldoActual)}.`, personName(user));
     setWalletModal(false);
-    setWalletForm({ ...emptyWalletForm, saldo: draftWallet.saldoActual, password: "", confirmationAccepted: false });
+    setWalletForm({ ...emptyWalletForm, saldo: draftWallet.saldoActual, confirmationAccepted: false });
     inform("Saldo general actualizado.", "success");
   };
 
@@ -319,7 +308,6 @@ export default function useOperationsActions({
     const nextCashBox = { saldoActual: Number(cashBox?.saldoActual || 0) - amount, updatedAt: new Date().toISOString() };
     const nextWallet = { saldoActual: Number(app.wallet?.saldoActual || 0) + amount, updatedAt: new Date().toISOString() };
     commit((current) => ({ ...current, cashBox: nextCashBox, wallet: nextWallet }));
-    notify(`${personName(user)} retiro ${money(amount)} de caja hacia saldo general.`, personName(user));
     setCashWithdrawalForm({ amount: 0, amountInput: "", motivo: "" });
     setCashWithdrawalModal(false);
     inform("Retiro de caja registrado.", "success");
@@ -345,7 +333,6 @@ export default function useOperationsActions({
       };
       commit((current) => ({ ...current, notifications: [notification, ...(current.notifications || [])].slice(0, 60) }));
     }
-    notify(`${personName(user)} programo un turno para ${schedule.responsable} el ${schedule.fecha}.`, personName(user));
     setScheduleForm(emptyScheduleForm);
     inform("Turno agendado correctamente.", "success");
   };
@@ -358,7 +345,6 @@ export default function useOperationsActions({
       ...current,
       schedules: (current.schedules || []).map((item) => item.id === id ? { ...target, estado } : item),
     }));
-    notify(`${personName(user)} marco la agenda de ${target.responsable} como ${estado}.`, personName(user));
     inform("Agenda actualizada.", "success");
   };
 
@@ -367,7 +353,6 @@ export default function useOperationsActions({
     const target = (app.schedules || []).find((item) => item.id === id);
     if (!target) return;
     commit((current) => ({ ...current, schedules: (current.schedules || []).filter((item) => item.id !== id) }));
-    notify(`${personName(user)} elimino el turno de ${target.responsable}.`, personName(user), "warning");
     inform("Turno eliminado.", "success");
   };
 

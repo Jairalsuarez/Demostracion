@@ -27,7 +27,7 @@ export default function WalletPage({ cashBox, expenses, formatDate, isAdmin, mon
   }, [orderedExpenses, safeCurrentPage]);
 
   const stats = [
-    { label: "Saldo", value: money(cashBox?.saldoActual || 0), detail: "Efectivo disponible para retirar" },
+    { label: "Caja", value: money(cashBox?.saldoActual || 0), detail: "Efectivo disponible para retirar" },
     { label: "Saldo general", value: money(wallet?.saldoActual || 0), detail: "Sube al retirar dinero de caja" },
     { label: "Egresos de hoy", value: money(expensesToday), detail: `${expenses.filter((item) => isToday(item.createdAt)).length} movimientos hoy` },
   ];

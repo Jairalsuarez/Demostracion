@@ -22,5 +22,9 @@ export default function useNotificationCenter(commit) {
     }));
   };
 
-  return { notify, markNotificationRead, markAllNotificationsRead };
+  const clearAllNotifications = () => {
+    commit((current) => ({ ...current, notifications: [] }));
+  };
+
+  return { notify, markNotificationRead, markAllNotificationsRead, clearAllNotifications };
 }

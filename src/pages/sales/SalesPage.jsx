@@ -60,12 +60,10 @@ export default function SalesPage() {
   const navigate = useNavigate();
   const { app, money, formatDate } = useAppContext();
   const [selectedSaleId, setSelectedSaleId] = useState(null);
-  const [sellerFilter, setSellerFilter] = useState("todos");
   const printRef = useRef(null);
 
   const sales = app.sales || [];
   const products = app.products || [];
-  const users = app.users || [];
 
   const now = new Date();
   const weekStart = startOfWeek(now);
@@ -73,25 +71,7 @@ export default function SalesPage() {
   const monthStart = startOfMonth(now);
   const monthEnd = endOfMonth(now);
 
-  const sellerList = useMemo(() => {
-    const map = new Map();
-    sales.forEach((s) => {
-      if (s.userId && !map.has(s.userId)) {
-        map.set(s.userId, { id: s.userId, name: s.userName || "Vendedor" });
-      }
-    });
-    users.forEach((u) => {
-      if (u.role === "vendedor" || u.role === "admin") {
-        map.set(u.id, { id: u.id, name: [u.nombre, u.apellido].filter(Boolean).join(" ") || u.nombre || u.email });
-      }
-    });
-    return [...map.values()].sort((a, b) => a.name.localeCompare(b.name));
-  }, [sales, users]);
-
-  const filteredSales = useMemo(() => {
-    if (sellerFilter === "todos") return sales;
-    return sales.filter((s) => s.userId === sellerFilter);
-  }, [sales, sellerFilter]);
+  const filteredSales = sales;
 
   const weekSales = useMemo(
     () => filteredSales.filter((s) => {
@@ -175,11 +155,6 @@ export default function SalesPage() {
     return sorted.length ? { id: sorted[0][0], ...sorted[0][1] } : null;
   }, [monthSales]);
 
-  const allSalesSorted = useMemo(
-    () => [...filteredSales].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
-    [filteredSales]
-  );
-
   const selectedSale = selectedSaleId ? sales.find((s) => s.id === selectedSaleId) || null : null;
 
   const formatDateTime = (value) =>
@@ -219,13 +194,20 @@ export default function SalesPage() {
   }, []);
 
   const weekNumber = getWeekNumber(now);
-  const previewCount = 5;
 
   return (
     <div className="space-y-6">
       <PageHeader
         action={
           <div className="flex flex-wrap gap-3">
+            <button
+              className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl border border-[#dfe7db] bg-white px-5 py-3 text-base font-semibold text-[#183325] transition hover:bg-[#f8fafc] active:scale-[0.99] dark:border-[#333] dark:bg-[#0a0a0a] dark:text-white dark:hover:bg-[#111]"
+              onClick={() => navigate("/panel/ventas/registro")}
+              type="button"
+            >
+              <Icon name="list_alt" />
+              Ver todas las ventas
+            </button>
             <button
               className="inline-flex min-h-[52px] items-center justify-center gap-3 rounded-xl bg-[#1f7a3a] px-5 py-3 text-base font-semibold text-white shadow-[0_12px_26px_rgba(31,122,58,0.20)] transition active:scale-[0.99] dark:bg-[linear-gradient(135deg,#2563eb,#1d4ed8)]"
               onClick={downloadPDF}
@@ -240,30 +222,6 @@ export default function SalesPage() {
         title="Analítica de ventas"
         description={`Semana ${weekNumber} — ${getShortDate(weekStart)} al ${getShortDate(weekEnd)}`}
       />
-
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#dfe7db] bg-white px-4 py-3 dark:border-[#333] dark:bg-[#0a0a0a]">
-        <div className="flex items-center gap-3">
-          <Icon className="text-[#5b6d61] dark:text-[#aaa]" name="person" />
-          <select
-            className="bg-transparent text-sm font-semibold text-[#183325] outline-none dark:text-white"
-            value={sellerFilter}
-            onChange={(e) => setSellerFilter(e.target.value)}
-          >
-            <option value="todos">Todos los vendedores</option>
-            {sellerList.map((seller) => (
-              <option key={seller.id} value={seller.id}>{seller.name}</option>
-            ))}
-          </select>
-        </div>
-        <button
-          className="inline-flex items-center gap-2 rounded-xl border border-[#dfe7db] bg-white px-4 py-2.5 text-sm font-semibold text-[#183325] transition hover:bg-[#f8fafc] active:scale-[0.99] dark:border-[#333] dark:bg-[#0a0a0a] dark:text-white dark:hover:bg-[#111]"
-          onClick={() => navigate("/panel/ventas/registro")}
-          type="button"
-        >
-          <Icon name="list_alt" />
-          Ver todas las ventas
-        </button>
-      </div>
 
       <div className="space-y-6" ref={printRef}>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

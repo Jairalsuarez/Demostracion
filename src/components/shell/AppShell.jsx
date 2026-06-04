@@ -12,6 +12,7 @@ import { isNativeApp } from "../../utils/platform.js";
 import DebugModal from "../modals/DebugModal";
 import TopMarquee from "../ui/TopMarquee";
 import UsageLimitBar from "../ui/UsageLimitBar";
+import BackButton from "../ui/BackButton";
 export default function AppShell() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -34,6 +35,7 @@ export default function AppShell() {
     logout,
     markAllNotificationsRead,
     markNotificationRead,
+    clearAllNotifications,
     notificationPermission,
     notifications,
     refreshAppData,
@@ -169,6 +171,10 @@ export default function AppShell() {
       {openNotifications ? (
         <NotificationPanel
           notifications={visibleNotifications}
+          onClearAll={() => {
+            clearAllNotifications();
+            setOpenNotifications(false);
+          }}
           onClose={() => setOpenNotifications(false)}
           onMarkAllRead={() => {
             markAllNotificationsRead();
@@ -279,6 +285,7 @@ export default function AppShell() {
       </div>
 
       <UsageLimitBar onExit={logout} onPauseChange={setDemoPaused} />
+      <BackButton />
 
       <Modal containerClassName="max-w-[420px] p-4" open={logoutModalOpen} onClose={() => setLogoutModalOpen(false)} text="Esta accion cerrara tu sesion." title="Cerrar sesion">
         <div className="mt-1 flex gap-3">

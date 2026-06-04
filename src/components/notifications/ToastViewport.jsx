@@ -39,7 +39,7 @@ function ToastCard({ toast, onDismiss }) {
       onPointerUp={finishDrag}
       style={{ opacity, transform: `translateX(${offsetX}px)` }}
     >
-      <div className="flex min-w-0 items-center gap-3">
+      <div className="flex min-w-0 flex-1 cursor-pointer items-center gap-3" onClick={() => { toast.action?.(); onDismiss(toast.id); }}>
         <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-[#f97316] shadow-sm dark:bg-[#0f172a]">
           <Icon name={toast.type === "error" ? "error" : toast.type === "success" ? "check_circle" : "notifications"} />
         </span>

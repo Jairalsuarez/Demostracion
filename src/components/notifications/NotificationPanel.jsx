@@ -1,6 +1,6 @@
 import Icon from "../ui/Icon";
 
-export default function NotificationPanel({ notifications, onClose, onMarkAllRead, onRead }) {
+export default function NotificationPanel({ notifications, onClose, onMarkAllRead, onRead, onClearAll }) {
   return (
     <div className="fixed right-3 top-[calc(env(safe-area-inset-top)+7.45rem)] z-[60] w-[min(330px,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-[#dfe7db] bg-white p-3 shadow-[0_12px_28px_rgba(15,23,42,0.16)] dark:border-[#23314d] dark:bg-[#0b1220] sm:absolute sm:inset-x-auto sm:right-0 sm:top-[calc(100%+0.75rem)] sm:w-[min(360px,calc(100vw-2rem))] sm:p-4">
       <div className="flex items-center justify-between gap-3">
@@ -8,9 +8,16 @@ export default function NotificationPanel({ notifications, onClose, onMarkAllRea
           <Icon className="text-[#f97316]" name="notifications_active" />
           <h3 className="text-sm font-semibold text-[#183325] dark:text-white">Novedades</h3>
         </div>
-        <button className="text-xs font-semibold text-[#f97316]" onClick={onMarkAllRead} type="button">
-          Marcar todo
-        </button>
+        <div className="flex gap-2">
+          {notifications.length ? (
+            <button className="text-xs font-semibold text-[#b91c1c]" onClick={onClearAll} type="button">
+              Eliminar todo
+            </button>
+          ) : null}
+          <button className="text-xs font-semibold text-[#f97316]" onClick={onMarkAllRead} type="button">
+            Marcar todo
+          </button>
+        </div>
       </div>
 
       <div className="mt-3 max-h-[min(420px,calc(100dvh-13rem))] space-y-2 overflow-auto">

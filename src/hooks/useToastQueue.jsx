@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const SHOWN_TOASTS_KEY = "sabores-shown-toasts";
 const SHOWN_TOAST_TTL_MS = 24 * 60 * 60 * 1000;
@@ -19,32 +19,59 @@ function rememberShownToast(key) {
   try {
     const current = getShownToastMap();
     window.localStorage.setItem(SHOWN_TOASTS_KEY, JSON.stringify({ ...current, [key]: Date.now() }));
-  } catch {
-    // Ignore private-mode/localStorage failures.
-  }
+  } catch {}
 }
 
 export default function useToastQueue(limit = 3, duration = 2200) {
   const [toasts, setToasts] = useState([]);
+  const timersRef = useRef({});
 
-  const pushToast = (message, type = "info", dedupeKey = "") => {
+  const pushToast = (message, type = "info", dedupeKey = "", action = null) => {
     if (dedupeKey) {
       const shown = getShownToastMap();
       if (shown[dedupeKey]) return;
       rememberShownToast(dedupeKey);
     }
 
-    setToasts((current) => [...current, { id: crypto.randomUUID(), message, type }].slice(-limit));
+    const id = crypto.randomUUID();
+    setToasts((current) => [...current, { id, message, type, action }].slice(-limit));
   };
 
-  const dismissToast = (id) => setToasts((current) => current.filter((toast) => toast.id !== id));
-  const dismissAllToasts = () => setToasts([]);
+  const dismissToast = (id) => {
+    if (timersRef.current[id]) {
+      clearTimeout(timersRef.current[id]);
+      delete timersRef.current[id];
+    }
+    setToasts((current) => current.filter((t) => t.id !== id));
+  };
 
   useEffect(() => {
-    if (!toasts.length) return undefined;
-    const timer = window.setTimeout(() => dismissAllToasts(), duration);
-    return () => window.clearTimeout(timer);
-  }, [duration, toasts]);
+    const currentIds = toasts.map((t) => t.id);
+    const activeIds = Object.keys(timersRef.current);
 
-  return { toasts, pushToast, dismissToast, dismissAllToasts };
+    activeIds.forEach((id) => {
+      if (!currentIds.includes(id)) {
+        clearTimeout(timersRef.current[id]);
+        delete timersRef.current[id];
+      }
+    });
+
+    currentIds.forEach((id) => {
+      if (!timersRef.current[id]) {
+        timersRef.current[id] = setTimeout(() => {
+          delete timersRef.current[id];
+          setToasts((current) => current.filter((t) => t.id !== id));
+        }, duration);
+      }
+    });
+  }, [toasts, duration]);
+
+  useEffect(() => {
+    return () => {
+      Object.values(timersRef.current).forEach(clearTimeout);
+      timersRef.current = {};
+    };
+  }, []);
+
+  return { toasts, pushToast, dismissToast };
 }

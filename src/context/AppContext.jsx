@@ -25,7 +25,7 @@ const AD_ACTION_THRESHOLD = 3;
 const EMPTY_PRODUCT = {
   nombre: "", categoria: "Bebidas", marca: "", descripcion: "", precio: 0, costo: 0, stock: 0, imagen_url: "", activo: true,
 };
-const EMPTY_WALLET_FORM = { saldo: 0, motivo: "", password: "", confirmationAccepted: false };
+const EMPTY_WALLET_FORM = { saldo: 0, motivo: "", confirmationAccepted: false };
 const EMPTY_CASH_WITHDRAWAL_FORM = { amount: 0, amountInput: "", motivo: "" };
 const EMPTY_EXPENSE = {
   categoria: "Mercaderia", categoryId: "", categoryName: "Mercaderia", isNewCategory: false, newCategoryName: "",
@@ -86,10 +86,10 @@ export function AppProvider({ children }) {
   const { editing, productForm, productModal, setProductForm, setProductModal, resetProductFlow, openCreateProduct, openEditProduct } = useProductEditor(EMPTY_PRODUCT);
 
   const commit = (updater) => setApp((current) => (typeof updater === "function" ? updater(current) : updater));
-  const { notify, markNotificationRead, markAllNotificationsRead } = useNotificationCenter(commit);
+  const { notify, markNotificationRead, markAllNotificationsRead, clearAllNotifications } = useNotificationCenter(commit);
 
-  const inform = (message, type = "info", shouldStore = false) => {
-    pushToast(message, type);
+  const inform = (message, type = "info", shouldStore = false, action = null) => {
+    pushToast(message, type, "", action);
     if (shouldStore) notify(message, personName(user) || "Fizzia", type);
   };
   const { loginLoading, authChecking, setAuthChecking, loginError, loginForm, setLoginForm, handleLogin, logout } = useAuthSession({
@@ -204,7 +204,7 @@ export function AppProvider({ children }) {
   };
 
   const { saveProduct, removeProduct, setFeaturedProduct } = useCatalogActions({
-    app, user, editing, productForm, commit, notify, inform, personName, resetProductFlow,
+    app, user, editing, productForm, commit, inform, personName, resetProductFlow,
   });
 
   const { startShift, closeShift, createSale, createInformalSale, createExpense, createMerchandiseExpense, adjustWallet, withdrawCashToWallet, createSchedule, updateScheduleStatus, deleteSchedule } = useOperationsActions({
@@ -216,7 +216,7 @@ export function AppProvider({ children }) {
     expense, distributors: app.distributors || [], setExpense, expenseSubmitting, setExpenseSubmitting, setExpenseModal,
     merchandise, setMerchandise, merchandiseLines, setMerchandiseLines, merchandiseSubmitting, setMerchandiseSubmitting, setMerchandiseModal,
     walletForm, setWalletForm, setWalletModal, cashWithdrawalForm, setCashWithdrawalForm, setCashWithdrawalModal,
-    scheduleForm, setScheduleForm, commit, notify, inform, personName, money, shortTime,
+    scheduleForm, setScheduleForm, commit, inform, personName, money, shortTime,
     emptyWalletForm: EMPTY_WALLET_FORM, emptyScheduleForm: EMPTY_SCHEDULE_FORM,
   });
 
@@ -248,7 +248,7 @@ export function AppProvider({ children }) {
 
   const uploadProfileAvatar = async (file) => { const url = await uploadAsset(file, "avatars"); if (url) inform("Foto actualizada.", "success"); return url; };
 
-  const { saveProfile } = useAccountActions({ session, user, commit, setSession, notify, inform, personName, mergeUsers });
+  const { saveProfile } = useAccountActions({ session, user, commit, setSession, inform, personName, mergeUsers });
 
   const value = {
     app, session, user, theme, setTheme, selected, setSelected,
@@ -278,7 +278,7 @@ export function AppProvider({ children }) {
     createExpense: wrappedCreateExpense, createMerchandiseExpense: wrappedCreateMerchandiseExpense,
     adjustWallet: wrappedAdjustWallet, withdrawCashToWallet: wrappedWithdrawCashToWallet,
     createSchedule, deleteSchedule, updateScheduleStatus, setFeaturedProduct,
-    saveProfile, uploadProfileAvatar, inform, logout,
+    saveProfile, uploadProfileAvatar, inform, logout, clearAllNotifications,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

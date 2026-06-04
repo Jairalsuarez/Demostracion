@@ -51,7 +51,7 @@ export default function ProductListTable({ canEdit = false, emptyMessage, money,
                 }}
                 type="button"
               >
-                <img alt={product.nombre} className="h-full w-full object-cover" decoding="async" loading="lazy" src={getOptimizedImageUrl(product.imagen_url, { width: 160, height: 160 })} />
+                {product.imagen_url ? <img alt={product.nombre} className="h-full w-full object-cover" decoding="async" loading="lazy" src={getOptimizedImageUrl(product.imagen_url, { width: 160, height: 160 })} /> : <Icon className="text-3xl text-[#9aa4b2]" name="inventory_2" />}
               </button>
               <div className="min-w-0 flex-1">
                 <strong className="block font-semibold text-[#183325] dark:text-[#f8fafc]">{product.nombre}</strong>
@@ -128,7 +128,7 @@ export default function ProductListTable({ canEdit = false, emptyMessage, money,
                     }}
                     type="button"
                   >
-                    <img alt={product.nombre} className="h-full w-full object-cover" decoding="async" loading="lazy" src={getOptimizedImageUrl(product.imagen_url, { width: 128, height: 128 })} />
+                    {product.imagen_url ? <img alt={product.nombre} className="h-full w-full object-cover" decoding="async" loading="lazy" src={getOptimizedImageUrl(product.imagen_url, { width: 128, height: 128 })} /> : <Icon className="text-2xl text-[#9aa4b2]" name="inventory_2" />}
                   </button>
                   <div className="min-w-0">
                     <strong className="block font-semibold text-[#183325] dark:text-[#f8fafc]">{product.nombre}</strong>

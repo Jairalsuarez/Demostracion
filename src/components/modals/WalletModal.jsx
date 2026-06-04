@@ -3,7 +3,6 @@ export default function WalletModal({ adjustWallet, onClose, open, setWalletForm
   const canSave =
     String(walletForm.motivo || "").trim() &&
     String(walletForm.saldo || "") !== "" &&
-    String(walletForm.password || "").trim() &&
     Boolean(walletForm.confirmationAccepted);
   const fieldClassName =
     "w-full rounded-xl border border-[#dfe7db] bg-[#f8faf6] px-4 py-3 text-[#183325] shadow-[inset_0_1px_0_rgba(255,255,255,0.45)] transition placeholder:text-[#8a988f] focus:border-[#f59e0b] focus:outline-none focus:ring-2 focus:ring-[#f59e0b]/15 dark:border-[#314056] dark:bg-[#0f172a] dark:text-white dark:placeholder:text-[#7f8ea3]";
@@ -19,18 +18,6 @@ export default function WalletModal({ adjustWallet, onClose, open, setWalletForm
         <label className="grid gap-2 text-sm font-semibold text-[#183325] dark:text-white">
           Motivo del cambio
           <textarea className={`${fieldClassName} min-h-28 resize-none`} onChange={(e) => setWalletForm((current) => ({ ...current, motivo: e.target.value }))} rows="3" value={walletForm.motivo} />
-        </label>
-
-        <label className="grid gap-2 text-sm font-semibold text-[#183325] dark:text-white">
-          Contrasena del administrador
-          <input
-            autoComplete="current-password"
-            className={fieldClassName}
-            onChange={(e) => setWalletForm((current) => ({ ...current, password: e.target.value }))}
-            placeholder="Ingresa tu contrasena actual"
-            type="password"
-            value={walletForm.password || ""}
-          />
         </label>
 
         <label className="flex items-start gap-3 rounded-xl border border-[#dbe6d8] bg-[#f8faf6] px-4 py-3 dark:border-[#314056] dark:bg-[#182235]">

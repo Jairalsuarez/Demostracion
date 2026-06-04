@@ -54,6 +54,7 @@ export default function ProductModal({
               <input
                 className={fieldClassName}
                 min="0"
+                onKeyDown={(e) => ["e", "E", "+", "-"].includes(e.key) && e.preventDefault()}
                 onChange={(e) => setProductForm((current) => ({ ...current, precio: e.target.value }))}
                 placeholder="0.00"
                 step="0.01"
@@ -67,6 +68,7 @@ export default function ProductModal({
               <input
                 className={fieldClassName}
                 min="0"
+                onKeyDown={(e) => ["e", "E", "+", "-"].includes(e.key) && e.preventDefault()}
                 onChange={(e) => setProductForm((current) => ({ ...current, costo: e.target.value }))}
                 placeholder="0.00"
                 step="0.01"
@@ -80,6 +82,7 @@ export default function ProductModal({
               <input
                 className={fieldClassName}
                 min="0"
+                onKeyDown={(e) => ["e", "E", "+", "-"].includes(e.key) && e.preventDefault()}
                 onChange={(e) => setProductForm((current) => ({ ...current, stock: Number(e.target.value || 0) }))}
                 placeholder="0"
                 step="1"

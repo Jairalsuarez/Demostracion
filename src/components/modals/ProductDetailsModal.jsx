@@ -17,7 +17,7 @@ export default function ProductDetailsModal({ money, onClose, open, product, var
       <div className="grid gap-5 lg:grid-cols-[minmax(320px,1fr)_380px] lg:items-stretch">
         <div className={`overflow-hidden p-3 sm:p-4 dark:bg-[#0d1710] ${isPublic ? "rounded-[24px] bg-white" : "rounded-xl bg-white"}`}>
           <div className={`flex h-[280px] items-center justify-center overflow-hidden sm:h-[420px] lg:h-[520px] dark:bg-[#122117] ${isPublic ? "rounded-[20px] bg-white" : "rounded-lg bg-white"}`}>
-            <img className="h-full w-full object-contain" src={product?.imagen_url} alt={product?.nombre} />
+            {product?.imagen_url ? <img className="h-full w-full object-contain" src={product.imagen_url} alt={product.nombre} /> : <Icon className="text-6xl text-[#9aa4b2]" name="inventory_2" />}
           </div>
         </div>
         <div className={`flex min-h-0 flex-col border p-4 sm:p-5 dark:border-white/10 dark:bg-[#122117] lg:h-[520px] ${isPublic ? "rounded-[24px] border-[#dceadf] bg-white" : "rounded-xl border-[#e4ece2] bg-white"}`}>

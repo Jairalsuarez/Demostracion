@@ -1,4 +1,4 @@
-export default function useAccountActions({ session, user, commit, setSession, notify, inform, personName, mergeUsers }) {
+export default function useAccountActions({ session, user, commit, setSession, inform, personName, mergeUsers }) {
   const saveProfile = async ({ nombre, apellido, telefono, avatarUrl }) => {
     const cleanName = String(nombre ?? user?.nombre ?? "").trim();
     const cleanLastName = String(apellido ?? user?.apellido ?? "").trim();
@@ -11,7 +11,6 @@ export default function useAccountActions({ session, user, commit, setSession, n
       users: mergeUsers(current.users.map((item) => item.id === nextUser.id ? { ...item, ...nextUser } : item)),
     }));
     setSession((current) => current ? { ...current, nombre: nextUser.nombre, apellido: nextUser.apellido || "", telefono: nextUser.telefono || "", avatarUrl: nextUser.avatarUrl || "", displayName: personName(nextUser) } : current);
-    notify(`${personName(nextUser)} actualizo su perfil.`, personName(nextUser));
     inform("Perfil actualizado.", "success");
     return { ok: true, user: nextUser };
   };

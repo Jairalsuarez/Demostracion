@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect } from "react";
+import { Suspense, lazy, useEffect, useRef } from "react";
 import { Navigate, Route, Routes, useNavigate, useParams } from "react-router-dom";
 import ProductDetailsModal from "./components/modals/ProductDetailsModal";
 import CashWithdrawalModal from "./components/modals/CashWithdrawalModal";
@@ -36,6 +36,11 @@ function NewProductRoute() {
     navigate("/panel/productos");
   };
 
+  const handleSave = async () => {
+    const saved = await saveProduct();
+    if (saved) navigate("/panel/productos");
+  };
+
   return (
     <ProductModal
       open
@@ -43,7 +48,7 @@ function NewProductRoute() {
       onClose={handleClose}
       productForm={productForm}
       setProductForm={setProductForm}
-      saveProduct={saveProduct}
+      saveProduct={handleSave}
       uploadProductImage={uploadProductImage}
       uploadError={uploadError}
       uploading={uploading}
@@ -52,13 +57,18 @@ function NewProductRoute() {
 }
 
 function EditProductRoute() {
-  const { products, productForm, setProductForm, saveProduct, uploadProductImage, uploadError, uploading, removeProduct } = useAppContext();
+  const { app, productForm, setProductForm, saveProduct, uploadProductImage, uploadError, uploading, removeProduct } = useAppContext();
   const navigate = useNavigate();
   const { productId } = useParams();
-  const product = products.find((p) => p.id === productId) || null;
+  const product = (app.products || []).find((p) => p.id === productId) || null;
 
-  const handleClose = () => {
-    navigate("/panel/productos");
+  const goToProducts = () => navigate("/panel/productos", { state: { focusProductId: productId } });
+
+  const handleClose = () => { goToProducts(); };
+
+  const handleSave = async () => {
+    const saved = await saveProduct();
+    if (saved) goToProducts();
   };
 
   return (
@@ -69,7 +79,7 @@ function EditProductRoute() {
       onClose={handleClose}
       productForm={productForm}
       setProductForm={setProductForm}
-      saveProduct={saveProduct}
+      saveProduct={handleSave}
       uploadProductImage={uploadProductImage}
       uploadError={uploadError}
       uploading={uploading}
@@ -102,6 +112,7 @@ function App() {
     merchandiseLines,
     merchandiseSubmitting,
     formatDate,
+    inform,
     money,
     openMerchandiseFlow,
     saleLines,
@@ -159,6 +170,16 @@ function App() {
     document.documentElement.classList.toggle("dark", theme === "dark");
   }, [theme]);
 
+  const lowStockNotified = useRef(false);
+  useEffect(() => {
+    if (lowStockNotified.current) return;
+    const lowStockProducts = (app.products || []).filter((p) => Number(p.stock) <= 5 && Number(p.stock) >= 1);
+    if (lowStockProducts.length) {
+      inform("Hay productos que necesitan reabastecer. Haz clic aqui para ver.", "warning", false, () => navigate("/panel/productos"));
+      lowStockNotified.current = true;
+    }
+  }, []);
+
   const goBack = (fallback = "/panel") => {
     const historyIndex = window.history.state?.idx;
     if (typeof historyIndex === "number" && historyIndex > 0) navigate(-1);
@@ -175,6 +196,7 @@ function App() {
     navigate("/panel/productos/nuevo");
   };
   const openProductEditAction = (product) => {
+    openEditProduct(product);
     navigate(`/panel/productos/${product.id}/editar`);
   };
 
@@ -342,7 +364,7 @@ function App() {
                     onNewProduct={openProductCreateAction}
                     onRemove={removeProduct}
                     onView={setSelected}
-                    products={(user?.role === "admin" ? app.products : visibleProducts).slice(0, 6)}
+                    products={user?.role === "admin" ? app.products : visibleProducts}
                   />
                 }
               />

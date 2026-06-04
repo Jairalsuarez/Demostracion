@@ -1,10 +1,13 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import SaleDetailsModal from "../../components/modals/SaleDetailsModal";
 import EmptyState from "../../components/ui/EmptyState";
 import Icon from "../../components/ui/Icon";
 import PageHeader from "../../components/ui/PageHeader";
+import Pagination from "../../components/ui/Pagination";
 import SectionBlock from "../../components/ui/SectionBlock";
 import { useAppContext } from "../../context/AppContext";
+
+const SALES_PER_PAGE = 5;
 
 function formatPaymentMethod(value = "") {
   const map = { efectivo: "Efectivo", transferencia_directa: "Transferencia", deuna: "Deuna" };
@@ -92,7 +95,17 @@ export default function SalesRegistryPage() {
     return result;
   }, [sales, sellerFilter, dateFrom, dateTo, paymentFilter, typeFilter, searchQuery, sortBy]);
 
-  const totalAmount = useMemo(() => filteredSales.reduce((acc, s) => acc + Number(s.total || 0), 0), [filteredSales]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.max(1, Math.ceil(filteredSales.length / SALES_PER_PAGE));
+  const safePage = Math.min(currentPage, totalPages);
+  const paginatedSales = useMemo(() => {
+    const start = (safePage - 1) * SALES_PER_PAGE;
+    return filteredSales.slice(start, start + SALES_PER_PAGE);
+  }, [filteredSales, safePage]);
+
+  useEffect(() => { setCurrentPage(1); }, [filteredSales]);
+
+  const hasAnyFilter = sellerFilter !== "todos" || dateFrom || dateTo || paymentFilter !== "todos" || typeFilter !== "todos" || searchQuery;
 
   const selectedSale = selectedSaleId ? sales.find((s) => s.id === selectedSaleId) || null : null;
 
@@ -109,14 +122,11 @@ export default function SalesRegistryPage() {
     setSortBy("fecha_desc");
   };
 
-  const hasAnyFilter = sellerFilter !== "todos" || dateFrom || dateTo || paymentFilter !== "todos" || typeFilter !== "todos" || searchQuery;
-
   return (
     <div className="space-y-6">
       <PageHeader
         eyebrow="Reportes"
         title="Todas las ventas"
-        description={`${filteredSales.length} resultado(s) — $${totalAmount.toFixed(2)}`}
       />
 
       <div className="grid gap-3 rounded-xl border border-[#dfe7db] bg-white p-4 dark:border-[#333] dark:bg-[#0a0a0a] sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
@@ -182,22 +192,9 @@ export default function SalesRegistryPage() {
         </div>
 
         <div>
-          <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.1em] text-[#5b6d61] dark:text-[#94a3b8]">Buscar</label>
-          <input
-            className="w-full rounded-lg border border-[#dfe7db] bg-white px-3 py-2 text-sm text-[#183325] outline-none placeholder:text-[#bbb] dark:border-[#333] dark:bg-[#0a0a0a] dark:text-white dark:placeholder:text-[#555]"
-            type="text"
-            placeholder="Nombre, producto..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-      </div>
-
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <label className="text-sm font-semibold text-[#5b6d61] dark:text-[#94a3b8]">Ordenar:</label>
+          <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.1em] text-[#5b6d61] dark:text-[#94a3b8]">Ordenar</label>
           <select
-            className="rounded-lg border border-[#dfe7db] bg-white px-3 py-1.5 text-sm font-semibold text-[#183325] outline-none dark:border-[#333] dark:bg-[#0a0a0a] dark:text-white"
+            className="w-full rounded-lg border border-[#dfe7db] bg-white px-3 py-2 text-sm font-semibold text-[#183325] outline-none dark:border-[#333] dark:bg-[#0a0a0a] dark:text-white"
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
           >
@@ -206,6 +203,19 @@ export default function SalesRegistryPage() {
             <option value="monto_desc">Mayor monto</option>
             <option value="monto_asc">Menor monto</option>
           </select>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3 flex-1 max-w-md">
+          <Icon className="shrink-0 text-[#5b6d61] dark:text-[#94a3b8]" name="search" />
+          <input
+            className="flex-1 rounded-lg border border-[#dfe7db] bg-white px-3 py-2 text-sm text-[#183325] outline-none placeholder:text-[#bbb] dark:border-[#333] dark:bg-[#0a0a0a] dark:text-white dark:placeholder:text-[#555]"
+            type="text"
+            placeholder="Buscar por nombre, producto..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
 
         {hasAnyFilter ? (
@@ -220,9 +230,9 @@ export default function SalesRegistryPage() {
       </div>
 
       <SectionBlock title={`Resultados (${filteredSales.length})`}>
-        {filteredSales.length ? (
+        {paginatedSales.length ? (
           <div className="space-y-2">
-            {filteredSales.map((sale) => (
+            {paginatedSales.map((sale) => (
               <button
                 key={sale.id}
                 className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-[#edf1ea] bg-white p-3 text-left dark:border-[#23314d] dark:bg-[#111827]"
@@ -250,6 +260,15 @@ export default function SalesRegistryPage() {
             description={hasAnyFilter ? "Intenta con otros filtros." : "Cuando registres ventas apareceran aqui."}
           />
         )}
+
+        <Pagination
+          currentPage={safePage}
+          itemLabel="ventas"
+          onPageChange={setCurrentPage}
+          pageSize={SALES_PER_PAGE}
+          totalItems={filteredSales.length}
+          totalPages={totalPages}
+        />
       </SectionBlock>
 
       <SaleDetailsModal

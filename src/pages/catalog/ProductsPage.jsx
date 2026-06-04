@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 import ProductListTable from "../../components/catalog/ProductListTable";
 import Icon from "../../components/ui/Icon";
 import PageHeader from "../../components/ui/PageHeader";
@@ -6,11 +7,20 @@ import Pagination from "../../components/ui/Pagination";
 import SectionBlock from "../../components/ui/SectionBlock";
 import useCatalogFilters from "../../hooks/useCatalogFilters.jsx";
 
-const PRODUCTS_PER_PAGE = 8;
+const PRODUCTS_PER_PAGE = 5;
 
 function ProductsInventoryView({ canCreate, canEdit, money, onEdit, onNewProduct, onRemove, onView, products }) {
   const { filteredProducts, search, setSearch } = useCatalogFilters(products);
   const [currentPage, setCurrentPage] = useState(1);
+  const location = useLocation();
+
+  useEffect(() => {
+    const focusId = location.state?.focusProductId;
+    if (!focusId) return;
+    const idx = filteredProducts.findIndex((p) => p.id === focusId);
+    if (idx !== -1) setCurrentPage(Math.floor(idx / PRODUCTS_PER_PAGE) + 1);
+    window.history.replaceState({}, "");
+  }, [location.state]);
   const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE));
   const safeCurrentPage = Math.min(currentPage, totalPages);
   const paginatedProducts = useMemo(() => {
@@ -57,7 +67,7 @@ function ProductsInventoryView({ canCreate, canEdit, money, onEdit, onNewProduct
         </label>
       </SectionBlock>
 
-      <SectionBlock description={`${filteredProducts.length} productos encontrados.`} title="Listado de productos">
+      <SectionBlock title="Listado de productos">
         <div className="space-y-4">
           <ProductListTable
             canEdit={canEdit}
