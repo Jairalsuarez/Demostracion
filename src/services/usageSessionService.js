@@ -200,6 +200,20 @@ function clearAllStorage() {
   if (window.indexedDB) {
     try { window.indexedDB.deleteDatabase(DB_NAME); } catch {}
   }
+  try { localStorage.removeItem("vt_sesh_remaining"); } catch {}
+}
+
+export function getBlockedStateSync() {
+  try {
+    const raw = getCookie(COOKIE_NAME) || getStorage() || getSessionStorage();
+    if (!raw) return null;
+    const data = typeof raw === "string" ? JSON.parse(raw) : raw;
+    if (!data.blockedAt) return null;
+    const unblockTime = getUnblockTime(data.blockedAt);
+    const remaining = unblockTime - Date.now();
+    if (remaining <= 0) return null;
+    return { unblockRemaining: remaining };
+  } catch { return null; }
 }
 
 export function clearSession() {

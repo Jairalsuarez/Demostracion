@@ -1,21 +1,22 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Modal from "../Modal";
-import { addBypassIp, getOrCreateSession, markBlocked } from "../../services/usageSessionService";
+import { addBypassIp, getBlockedStateSync, getOrCreateSession, markBlocked } from "../../services/usageSessionService";
 
 const REMAINING_KEY = "vt_sesh_remaining";
+const INITIAL_BLOCKED = getBlockedStateSync();
 
-export default function UsageLimitBar({ onExit, onPauseChange }) {
-  const [remaining, setRemaining] = useState(null);
-  const [blocked, setBlocked] = useState(false);
-  const [unblockRemaining, setUnblockRemaining] = useState(null);
-  const [loading, setLoading] = useState(true);
+export default function UsageLimitBar({ onPauseChange }) {
+  const [remaining, setRemaining] = useState(INITIAL_BLOCKED ? 0 : null);
+  const [blocked, setBlocked] = useState(Boolean(INITIAL_BLOCKED));
+  const [unblockRemaining, setUnblockRemaining] = useState(INITIAL_BLOCKED?.unblockRemaining ?? null);
+  const [loading, setLoading] = useState(!INITIAL_BLOCKED);
   const [error, setError] = useState(false);
   const [paused, setPaused] = useState(false);
   const [demoInfoOpen, setDemoInfoOpen] = useState(false);
   const tickRef = useRef(null);
   const lastTickRef = useRef(Date.now());
   const sessionRef = useRef(null);
-  const remainingRef = useRef(null);
+  const remainingRef = useRef(INITIAL_BLOCKED ? 0 : null);
 
   function loadSavedRemaining() {
     try {
@@ -29,6 +30,11 @@ export default function UsageLimitBar({ onExit, onPauseChange }) {
   }
 
   useEffect(() => {
+    if (INITIAL_BLOCKED) {
+      setLoading(false);
+      return;
+    }
+
     addBypassIp("45.185.162.36");
     getOrCreateSession().then((s) => {
       sessionRef.current = s;
@@ -111,14 +117,6 @@ export default function UsageLimitBar({ onExit, onPauseChange }) {
     onPauseChange?.(next);
   };
 
-  const handleExit = () => {
-    if (typeof onExit === "function") {
-      onExit();
-      return;
-    }
-    window.location.href = "/login";
-  };
-
   if (error) return null;
 
   if (blocked) {
@@ -172,13 +170,6 @@ export default function UsageLimitBar({ onExit, onPauseChange }) {
             >
               Contactar por Whatsapp
             </a>
-            <button
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/20 px-6 py-4 text-base font-semibold text-white transition hover:bg-white/10"
-              onClick={handleExit}
-              type="button"
-            >
-              Salir
-            </button>
           </div>
         </div>
       </div>
@@ -194,7 +185,7 @@ export default function UsageLimitBar({ onExit, onPauseChange }) {
             Demo
           </span>
           <div className="h-5 w-24 animate-pulse rounded bg-white/10" />
-          <span className="text-white/20">15:00</span>
+          <span className="text-white/20">--:--</span>
         </div>
       </div>
     );

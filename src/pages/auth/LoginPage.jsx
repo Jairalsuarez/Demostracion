@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import AuthCheckingScreen from "../../components/ui/AuthCheckingScreen.jsx";
 import AdOverlay from "../../components/ui/AdOverlay.jsx";
 import Icon from "../../components/ui/Icon";
 import ThemeSwitch from "../../components/ui/ThemeSwitch.jsx";
 import { useAppContext } from "../../context/AppContext";
+import { getBlockedStateSync } from "../../services/usageSessionService";
 import { isNativeApp } from "../../utils/platform.js";
 
 const FIZZIA_URL = "https://fizzia.vercel.app/";
@@ -27,10 +28,73 @@ export default function LoginPage() {
   const nativeApp = isNativeApp();
   const darkMode = theme === "dark";
 
+  const initialBlocked = useRef(getBlockedStateSync());
+  const [blocked, setBlocked] = useState(Boolean(initialBlocked.current));
+  const [unblockRemaining, setUnblockRemaining] = useState(initialBlocked.current?.unblockRemaining ?? null);
+  const lastTickRef = useRef(Date.now());
+
+  useEffect(() => {
+    if (!blocked) return;
+    const id = setInterval(() => {
+      const now = Date.now();
+      const delta = now - lastTickRef.current;
+      lastTickRef.current = now;
+      setUnblockRemaining((prev) => {
+        if (prev === null) return prev;
+        const next = prev - delta;
+        if (next <= 0) { window.location.reload(); return 0; }
+        return next;
+      });
+    }, 1000);
+    return () => clearInterval(id);
+  }, [blocked]);
+
   useEffect(() => {
     const idx = Math.floor(Math.random() * ADS.length);
     setLoginAd(ADS[idx]);
   }, []);
+
+  if (blocked) {
+    const totalSec = Math.floor((unblockRemaining ?? 0) / 1000);
+    const hours = Math.floor(totalSec / 3600);
+    const mins = Math.floor((totalSec % 3600) / 60);
+    const secs = totalSec % 60;
+    const display = hours > 0
+      ? `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`
+      : `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+    return (
+      <div style={{ position: "fixed", inset: 0, zIndex: 99999, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0,0,0,0.92)", padding: "2rem" }}>
+        <div className="max-w-md text-center">
+          <svg className="mx-auto mb-6 h-16 w-16 text-[#fca5a5]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+            <circle cx="12" cy="13" r="8" />
+            <path d="M12 9v4l2.5 2.5" />
+            <path d="M12 5V3" />
+            <path d="M10 3h4" />
+          </svg>
+          <h2 className="text-2xl font-bold text-white">Tiempo de uso agotado</h2>
+          <p className="mt-2 text-sm leading-6 text-[#999]">
+            Vuelve a intentar cuando termine el contador
+          </p>
+          <div className="mx-auto mt-6 flex items-center justify-center gap-3">
+            <svg className="h-16 w-16 -rotate-90" viewBox="0 0 48 48">
+              <circle cx="24" cy="24" fill="none" r="20" stroke="white" strokeOpacity="0.1" strokeWidth="4" />
+              <circle cx="24" cy="24" fill="none" r="20" stroke="#fca5a5" strokeLinecap="round" strokeWidth="4"
+                strokeDasharray={2 * Math.PI * 20}
+                strokeDashoffset={2 * Math.PI * 20 * (1 - Math.min(Math.max(unblockRemaining / (24 * 60 * 60 * 1000), 0), 1))}
+                style={{ transition: "stroke-dashoffset 1s linear" }} />
+            </svg>
+            <span className="text-3xl font-bold tabular-nums tracking-tight text-[#fca5a5]">{display}</span>
+          </div>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
+            <a className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#2fa84f] px-6 py-4 text-base font-semibold text-white transition hover:bg-[#289644]"
+              href="https://wa.me/5930989200977" rel="noopener noreferrer" target="_blank">
+              Contactar por Whatsapp
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (session) {
     return <Navigate replace to="/panel" />;

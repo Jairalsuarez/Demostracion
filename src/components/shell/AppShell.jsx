@@ -284,7 +284,7 @@ export default function AppShell() {
         </div>
       </div>
 
-      <UsageLimitBar onExit={logout} onPauseChange={setDemoPaused} />
+      <UsageLimitBar onPauseChange={setDemoPaused} />
       <BackButton />
 
       <Modal containerClassName="max-w-[420px] p-4" open={logoutModalOpen} onClose={() => setLogoutModalOpen(false)} text="Esta accion cerrara tu sesion." title="Cerrar sesion">
